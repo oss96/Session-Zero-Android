@@ -15,10 +15,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityName
 import com.ossalali.sessionzero.domain.model.Character
@@ -26,35 +25,34 @@ import com.ossalali.sessionzero.domain.model.DerivedStats
 import com.ossalali.sessionzero.domain.rules.GameRules
 import com.ossalali.sessionzero.ui.common.AbilityScoreBox
 import com.ossalali.sessionzero.ui.common.SectionHeader
-import com.ossalali.sessionzero.ui.wizard.WizardViewModel
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun ReviewStep(
     character: Character,
     derivedStats: DerivedStats,
-    viewModel: WizardViewModel,
+    isSaving: Boolean = false,
+    onSave: () -> Unit = {},
 ) {
-    val isSaving by viewModel.isSaving.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
     ) {
         SectionHeader(text = "Character Summary")
 
-        // Basic Info
-        ReviewRow("Name", character.name.ifEmpty { "Unnamed" })
-        ReviewRow("Class", character.className?.displayName ?: "None")
-        ReviewRow("Level", "${character.level}")
-        character.subclass?.let { ReviewRow("Subclass", it) }
-        ReviewRow("Species", character.species?.displayName ?: "None")
-        character.speciesLineage?.let { ReviewRow("Lineage", it) }
-        ReviewRow("Background", character.background?.displayName ?: "None")
-        character.alignment?.let { ReviewRow("Alignment", it.displayName) }
+        ReviewRow(label = "Name", value = character.name.ifEmpty { "Unnamed" })
+        ReviewRow(label = "Class", value = character.className?.displayName ?: "None")
+        ReviewRow(label = "Level", value = "${character.level}")
+        character.subclass?.let { ReviewRow(label = "Subclass", value = it) }
+        ReviewRow(label = "Species", value = character.species?.displayName ?: "None")
+        character.speciesLineage?.let { ReviewRow(label = "Lineage", value = it) }
+        ReviewRow(label = "Background", value = character.background?.displayName ?: "None")
+        character.alignment?.let { ReviewRow(label = "Alignment", value = it.displayName) }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(height = 16.dp))
         SectionHeader(text = "Ability Scores")
 
         Row(
@@ -72,33 +70,33 @@ fun ReviewStep(
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(height = 16.dp))
         SectionHeader(text = "Combat Stats")
 
-        ReviewRow("Max HP", "${derivedStats.maxHP}")
-        ReviewRow("AC", "${derivedStats.armorClass}")
-        ReviewRow("Initiative", "+${derivedStats.initiative}")
-        ReviewRow("Speed", "${derivedStats.speed}ft")
-        ReviewRow("Hit Dice", derivedStats.hitDice)
-        ReviewRow("Proficiency Bonus", "+${derivedStats.proficiencyBonus}")
-        derivedStats.spellSaveDC?.let { ReviewRow("Spell Save DC", "$it") }
-        derivedStats.spellAttackBonus?.let { ReviewRow("Spell Attack", "+$it") }
+        ReviewRow(label = "Max HP", value = "${derivedStats.maxHP}")
+        ReviewRow(label = "AC", value = "${derivedStats.armorClass}")
+        ReviewRow(label = "Initiative", value = "+${derivedStats.initiative}")
+        ReviewRow(label = "Speed", value = "${derivedStats.speed}ft")
+        ReviewRow(label = "Hit Dice", value = derivedStats.hitDice)
+        ReviewRow(label = "Proficiency Bonus", value = "+${derivedStats.proficiencyBonus}")
+        derivedStats.spellSaveDC?.let { ReviewRow(label = "Spell Save DC", value = "$it") }
+        derivedStats.spellAttackBonus?.let { ReviewRow(label = "Spell Attack", value = "+$it") }
 
         if (character.skillProficiencies.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(height = 16.dp))
             SectionHeader(text = "Skill Proficiencies")
-            Text(character.skillProficiencies.joinToString(", ") { it.displayName })
+            Text(text = character.skillProficiencies.joinToString(separator = ", ") { it.displayName })
         }
 
         if (character.equipment.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(height = 16.dp))
             SectionHeader(text = "Equipment")
             character.equipment.forEach { item ->
-                Text("- ${item.name}${if (item.quantity > 1) " x${item.quantity}" else ""}")
+                Text(text = "- ${item.name}${if (item.quantity > 1) " x${item.quantity}" else ""}")
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(height = 24.dp))
 
         val nameValid = character.name.isNotBlank()
         if (!nameValid) {
@@ -111,14 +109,14 @@ fun ReviewStep(
         }
 
         Button(
-            onClick = { viewModel.saveCharacter() },
+            onClick = onSave,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isSaving && nameValid,
         ) {
             if (isSaving) {
-                CircularProgressIndicator(modifier = Modifier.padding(4.dp))
+                CircularProgressIndicator(modifier = Modifier.padding(all = 4.dp))
             } else {
-                Text("Save Character")
+                Text(text = "Save Character")
             }
         }
     }
@@ -139,6 +137,29 @@ private fun ReviewRow(label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ReviewStepPreview() {
+    SessionZeroTheme {
+        ReviewStep(
+            character = PreviewData.sampleCharacter,
+            derivedStats = PreviewData.sampleDerivedStats,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ReviewStepSavingPreview() {
+    SessionZeroTheme {
+        ReviewStep(
+            character = PreviewData.sampleCharacter,
+            derivedStats = PreviewData.sampleDerivedStats,
+            isSaving = true,
         )
     }
 }

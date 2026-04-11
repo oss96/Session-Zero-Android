@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityScores
 import com.ossalali.sessionzero.domain.model.Character
@@ -22,12 +23,13 @@ import com.ossalali.sessionzero.domain.model.SkillName
 import com.ossalali.sessionzero.domain.rules.BackgroundData
 import com.ossalali.sessionzero.domain.rules.ClassData
 import com.ossalali.sessionzero.ui.common.SectionHeader
-import com.ossalali.sessionzero.ui.wizard.WizardViewModel
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun SkillsStep(
     character: Character,
-    viewModel: WizardViewModel,
+    onToggleSkill: (SkillName) -> Unit = {},
 ) {
     val classDef = character.className?.let { ClassData.ALL_CLASSES.find { c -> c.name == it } }
     val bgDef = character.background?.let { BackgroundData.ALL_BACKGROUNDS.find { b -> b.name == it } }
@@ -42,25 +44,25 @@ fun SkillsStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
     ) {
         SectionHeader(text = "Skill Proficiencies")
 
         if (backgroundSkills.isNotEmpty()) {
             Text(
-                "Background skills (locked): ${backgroundSkills.joinToString(", ") { it.displayName }}",
+                text = "Background skills (locked): ${backgroundSkills.joinToString(", ") { it.displayName }}",
                 style = MaterialTheme.typography.bodySmall,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(height = 4.dp))
         }
 
         Text(
-            "Choose $maxClassSkills class skills ($classSelectedCount selected)",
+            text = "Choose $maxClassSkills class skills ($classSelectedCount selected)",
             style = MaterialTheme.typography.bodyMedium,
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(height = 12.dp))
 
         AbilityScores.SKILLS_BY_ABILITY.forEach { (ability, skills) ->
             val abilityLabel = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
@@ -88,7 +90,7 @@ fun SkillsStep(
                     Checkbox(
                         checked = isSelected,
                         onCheckedChange = {
-                            if (canToggle) viewModel.toggleSkillProficiency(skill)
+                            if (canToggle) onToggleSkill(skill)
                         },
                         enabled = canToggle,
                     )
@@ -105,7 +107,7 @@ fun SkillsStep(
                     )
                     if (isBackgroundSkill) {
                         Text(
-                            " (background)",
+                            text = " (background)",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -113,5 +115,13 @@ fun SkillsStep(
                 }
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SkillsStepPreview() {
+    SessionZeroTheme {
+        SkillsStep(character = PreviewData.sampleCharacter)
     }
 }

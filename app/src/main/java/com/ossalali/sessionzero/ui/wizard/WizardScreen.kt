@@ -57,6 +57,7 @@ fun WizardScreen(
     val currentStep by viewModel.currentStep.collectAsState()
     val derivedStats by viewModel.derivedStats.collectAsState()
     val saveComplete by viewModel.saveComplete.collectAsState()
+    val isSaving by viewModel.isSaving.collectAsState()
 
     LaunchedEffect(characterId) {
         viewModel.initialize(characterId = characterId)
@@ -77,17 +78,59 @@ fun WizardScreen(
         onNext = { viewModel.nextStep() },
         stepContent = { page, pagerCharacter ->
             when (page) {
-                0 -> ClassStep(character = pagerCharacter, viewModel = viewModel)
-                1 -> SpeciesStep(character = pagerCharacter, viewModel = viewModel)
-                2 -> BackgroundStep(character = pagerCharacter, viewModel = viewModel)
-                3 -> AbilityScoresStep(character = pagerCharacter, viewModel = viewModel)
-                4 -> SkillsStep(character = pagerCharacter, viewModel = viewModel)
-                5 -> EquipmentStep(character = pagerCharacter, viewModel = viewModel)
-                6 -> DetailsStep(character = pagerCharacter, viewModel = viewModel)
+                0 -> ClassStep(
+                    character = pagerCharacter,
+                    onClassSelected = { viewModel.setClass(className = it) },
+                    onLevelChanged = { viewModel.setLevel(level = it) },
+                    onSubclassSelected = { viewModel.setSubclass(subclass = it) },
+                )
+                1 -> SpeciesStep(
+                    character = pagerCharacter,
+                    onSpeciesSelected = { viewModel.setSpecies(species = it) },
+                    onLineageSelected = { viewModel.setSpeciesLineage(lineage = it) },
+                )
+                2 -> BackgroundStep(
+                    character = pagerCharacter,
+                    onBackgroundSelected = { viewModel.setBackground(background = it) },
+                    onAbilityBonusesChanged = { viewModel.setAbilityScoreBonuses(bonuses = it) },
+                )
+                3 -> AbilityScoresStep(
+                    character = pagerCharacter,
+                    onMethodChanged = { viewModel.setAbilityScoreMethod(method = it) },
+                    onBaseScoreChanged = { ability, value -> viewModel.setBaseAbilityScore(ability = ability, value = value) },
+                    onAllScoresChanged = { s, d, c, i, w, ch -> viewModel.setAllBaseScores(str = s, dex = d, con = c, int = i, wis = w, cha = ch) },
+                )
+                4 -> SkillsStep(
+                    character = pagerCharacter,
+                    onToggleSkill = { viewModel.toggleSkillProficiency(skill = it) },
+                )
+                5 -> EquipmentStep(
+                    character = pagerCharacter,
+                    onEquipmentChoiceChanged = { viewModel.setEquipmentChoice(choice = it) },
+                    onCoinsChanged = { viewModel.setCoins(coins = it) },
+                    onEquipmentSet = { viewModel.setEquipment(items = it) },
+                    onAddEquipmentItem = { viewModel.addEquipmentItem(item = it) },
+                    onRemoveEquipmentItem = { viewModel.removeEquipmentItem(index = it) },
+                )
+                6 -> DetailsStep(
+                    character = pagerCharacter,
+                    onNameChanged = { viewModel.setName(name = it) },
+                    onPronounsChanged = { viewModel.setPronouns(pronouns = it) },
+                    onAlignmentChanged = { viewModel.setAlignment(alignment = it) },
+                    onAppearanceChanged = { viewModel.setAppearance(appearance = it) },
+                    onPersonalityTraitsChanged = { viewModel.setPersonalityTraits(value = it) },
+                    onIdealsChanged = { viewModel.setIdeals(value = it) },
+                    onBondsChanged = { viewModel.setBonds(value = it) },
+                    onFlawsChanged = { viewModel.setFlaws(value = it) },
+                    onBackstoryChanged = { viewModel.setBackstory(value = it) },
+                    onAlliesChanged = { viewModel.setAlliesAndOrganizations(value = it) },
+                    onNotesChanged = { viewModel.setAdditionalNotes(value = it) },
+                )
                 7 -> ReviewStep(
                     character = pagerCharacter,
                     derivedStats = derivedStats,
-                    viewModel = viewModel,
+                    isSaving = isSaving,
+                    onSave = { viewModel.saveCharacter() },
                 )
             }
         },

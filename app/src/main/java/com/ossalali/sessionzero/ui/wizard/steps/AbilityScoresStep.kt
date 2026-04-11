@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityName
 import com.ossalali.sessionzero.domain.model.AbilityScores
@@ -47,13 +48,16 @@ import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.rules.AbilityRules
 import com.ossalali.sessionzero.domain.rules.GameRules
 import com.ossalali.sessionzero.ui.common.SectionHeader
-import com.ossalali.sessionzero.ui.wizard.WizardViewModel
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AbilityScoresStep(
     character: Character,
-    viewModel: WizardViewModel,
+    onMethodChanged: (String) -> Unit = {},
+    onBaseScoreChanged: (AbilityName, Int) -> Unit = { _, _ -> },
+    onAllScoresChanged: (Int, Int, Int, Int, Int, Int) -> Unit = { _, _, _, _, _, _ -> },
 ) {
     val methods = listOf("pointBuy", "standardArray", "rolled", "manual")
     val methodLabels = listOf("Point Buy", "Standard", "Roll", "Manual")
@@ -63,8 +67,8 @@ fun AbilityScoresStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
     ) {
         SectionHeader(text = "Ability Scores")
 
@@ -72,25 +76,41 @@ fun AbilityScoresStep(
             methodLabels.forEachIndexed { index, label ->
                 SegmentedButton(
                     selected = index == selectedIndex,
-                    onClick = { viewModel.setAbilityScoreMethod(methods[index]) },
+                    onClick = { onMethodChanged(methods[index]) },
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = methods.size),
-                ) { Text(label, style = MaterialTheme.typography.labelSmall) }
+                ) { Text(text = label, style = MaterialTheme.typography.labelSmall) }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(height = 16.dp))
 
         when (selectedMethod) {
-            "pointBuy" -> PointBuyPanel(character, viewModel)
-            "standardArray" -> StandardArrayPanel(character, viewModel)
-            "rolled" -> RollPanel(character, viewModel)
-            "manual" -> ManualPanel(character, viewModel)
+            "pointBuy" -> PointBuyPanel(
+                character = character,
+                onBaseScoreChanged = onBaseScoreChanged,
+            )
+            "standardArray" -> StandardArrayPanel(
+                character = character,
+                onBaseScoreChanged = onBaseScoreChanged,
+            )
+            "rolled" -> RollPanel(
+                character = character,
+                onMethodChanged = onMethodChanged,
+                onAllScoresChanged = onAllScoresChanged,
+            )
+            "manual" -> ManualPanel(
+                character = character,
+                onBaseScoreChanged = onBaseScoreChanged,
+            )
         }
     }
 }
 
 @Composable
-private fun PointBuyPanel(character: Character, viewModel: WizardViewModel) {
+private fun PointBuyPanel(
+    character: Character,
+    onBaseScoreChanged: (AbilityName, Int) -> Unit,
+) {
     val scores = character.baseAbilityScores
     val scoreList = AbilityName.entries.map { scores[it] }
     val remaining = AbilityRules.remainingPoints(scoreList)
@@ -101,7 +121,7 @@ private fun PointBuyPanel(character: Character, viewModel: WizardViewModel) {
         fontWeight = FontWeight.Bold,
     )
 
-    Spacer(Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(height = 8.dp))
 
     AbilityName.entries.forEach { ability ->
         val score = scores[ability]
@@ -115,31 +135,31 @@ private fun PointBuyPanel(character: Character, viewModel: WizardViewModel) {
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = label, modifier = Modifier.width(100.dp))
+            Text(text = label, modifier = Modifier.width(width = 100.dp))
             IconButton(
-                onClick = { viewModel.setBaseAbilityScore(ability, score - 1) },
+                onClick = { onBaseScoreChanged(ability, score - 1) },
                 enabled = AbilityRules.canDecrease(score),
             ) {
-                Icon(Icons.Default.Remove, contentDescription = "Decrease")
+                Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease")
             }
             Text(
                 text = "$score",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(32.dp),
+                modifier = Modifier.width(width = 32.dp),
             )
             IconButton(
-                onClick = { viewModel.setBaseAbilityScore(ability, score + 1) },
+                onClick = { onBaseScoreChanged(ability, score + 1) },
                 enabled = AbilityRules.canIncrease(score, remaining),
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Increase")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Increase")
             }
             Text(
                 text = "($sign$mod)",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
-            Spacer(Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(weight = 1f))
             Text(
                 text = "Cost: ${AbilityRules.pointBuyCost(score)}",
                 style = MaterialTheme.typography.bodySmall,
@@ -150,10 +170,12 @@ private fun PointBuyPanel(character: Character, viewModel: WizardViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StandardArrayPanel(character: Character, viewModel: WizardViewModel) {
+private fun StandardArrayPanel(
+    character: Character,
+    onBaseScoreChanged: (AbilityName, Int) -> Unit,
+) {
     val assignments = remember { mutableStateMapOf<AbilityName, Int>() }
 
-    // Initialize from character if already set
     if (assignments.isEmpty()) {
         val scores = character.baseAbilityScores
         AbilityName.entries.forEach { ability ->
@@ -167,11 +189,11 @@ private fun StandardArrayPanel(character: Character, viewModel: WizardViewModel)
     val usedValues = assignments.values.toSet()
 
     Text(
-        "Standard Array: ${AbilityRules.STANDARD_ARRAY.joinToString(", ")}",
+        text = "Standard Array: ${AbilityRules.STANDARD_ARRAY.joinToString(", ")}",
         style = MaterialTheme.typography.titleSmall,
     )
 
-    Spacer(Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(height = 8.dp))
 
     AbilityName.entries.forEach { ability ->
         val label = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
@@ -183,27 +205,27 @@ private fun StandardArrayPanel(character: Character, viewModel: WizardViewModel)
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = label, modifier = Modifier.width(100.dp))
+            Text(text = label, modifier = Modifier.width(width = 100.dp))
 
             ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
                 OutlinedTextField(
                     value = assignments[ability]?.toString() ?: "—",
                     onValueChange = {},
                     readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        .width(120.dp),
+                        .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                        .width(width = 120.dp),
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     AbilityRules.STANDARD_ARRAY.forEach { value ->
                         val isUsed = value in usedValues && assignments[ability] != value
                         DropdownMenuItem(
-                            text = { Text("$value") },
+                            text = { Text(text = "$value") },
                             onClick = {
                                 assignments[ability] = value
                                 expanded = false
-                                applyAssignments(assignments, viewModel)
+                                assignments.forEach { (a, s) -> onBaseScoreChanged(a, s) }
                             },
                             enabled = !isUsed,
                         )
@@ -215,24 +237,31 @@ private fun StandardArrayPanel(character: Character, viewModel: WizardViewModel)
 }
 
 @Composable
-private fun RollPanel(character: Character, viewModel: WizardViewModel) {
+private fun RollPanel(
+    character: Character,
+    onMethodChanged: (String) -> Unit,
+    onAllScoresChanged: (Int, Int, Int, Int, Int, Int) -> Unit,
+) {
     Column {
-        Text("Roll 4d6, drop lowest for each ability score.", style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Roll 4d6, drop lowest for each ability score.",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(modifier = Modifier.height(height = 8.dp))
 
         Button(
             onClick = {
                 val scores = AbilityName.entries.map { AbilityRules.rollAbilityScore() }
-                viewModel.setAllBaseScores(scores[0], scores[1], scores[2], scores[3], scores[4], scores[5])
-                viewModel.setAbilityScoreMethod("rolled")
+                onAllScoresChanged(scores[0], scores[1], scores[2], scores[3], scores[4], scores[5])
+                onMethodChanged("rolled")
             },
         ) {
-            Icon(Icons.Default.Casino, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Roll All")
+            Icon(imageVector = Icons.Default.Casino, contentDescription = null)
+            Spacer(modifier = Modifier.width(width = 8.dp))
+            Text(text = "Roll All")
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(height = 16.dp))
 
         AbilityName.entries.forEach { ability ->
             val score = character.baseAbilityScores[ability]
@@ -246,7 +275,7 @@ private fun RollPanel(character: Character, viewModel: WizardViewModel) {
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = label, modifier = Modifier.width(100.dp))
+                Text(text = label, modifier = Modifier.width(width = 100.dp))
                 Text(
                     text = "$score",
                     style = MaterialTheme.typography.titleMedium,
@@ -262,7 +291,10 @@ private fun RollPanel(character: Character, viewModel: WizardViewModel) {
 }
 
 @Composable
-private fun ManualPanel(character: Character, viewModel: WizardViewModel) {
+private fun ManualPanel(
+    character: Character,
+    onBaseScoreChanged: (AbilityName, Int) -> Unit,
+) {
     AbilityName.entries.forEach { ability ->
         val score = character.baseAbilityScores[ability]
         val label = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
@@ -272,25 +304,27 @@ private fun ManualPanel(character: Character, viewModel: WizardViewModel) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         ) {
-            Text(text = label, modifier = Modifier.width(100.dp))
+            Text(text = label, modifier = Modifier.width(width = 100.dp))
             OutlinedTextField(
                 value = score.toString(),
                 onValueChange = { input ->
                     val newVal = input.toIntOrNull()?.coerceIn(1, 30) ?: return@OutlinedTextField
-                    viewModel.setBaseAbilityScore(ability, newVal)
+                    onBaseScoreChanged(ability, newVal)
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.width(80.dp),
+                modifier = Modifier.width(width = 80.dp),
                 singleLine = true,
             )
         }
     }
 }
 
-private fun applyAssignments(assignments: Map<AbilityName, Int>, viewModel: WizardViewModel) {
-    assignments.forEach { (ability, score) ->
-        viewModel.setBaseAbilityScore(ability, score)
+@PreviewLightDark
+@Composable
+private fun AbilityScoresStepPreview() {
+    SessionZeroTheme {
+        AbilityScoresStep(character = PreviewData.sampleCharacter)
     }
 }

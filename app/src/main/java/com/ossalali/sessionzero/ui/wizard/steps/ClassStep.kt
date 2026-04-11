@@ -23,42 +23,46 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.ClassName
 import com.ossalali.sessionzero.domain.rules.ClassData
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.common.SelectionGrid
-import com.ossalali.sessionzero.ui.wizard.WizardViewModel
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClassStep(
     character: Character,
-    viewModel: WizardViewModel,
+    onClassSelected: (ClassName) -> Unit = {},
+    onLevelChanged: (Int) -> Unit = {},
+    onSubclassSelected: (String?) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(all = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
     ) {
         SectionHeader(text = "Choose Your Class")
 
         SelectionGrid(
             items = ClassData.ALL_CLASSES,
             selectedItem = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } },
-            onSelect = { viewModel.setClass(it.name) },
+            onSelect = { onClassSelected(it.name) },
             label = { it.name.displayName },
             description = { "d${it.hitDie} hit die" },
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(height = 16.dp))
 
         SectionHeader(text = "Level: ${character.level}")
         Slider(
             value = character.level.toFloat(),
-            onValueChange = { viewModel.setLevel(it.toInt()) },
+            onValueChange = { onLevelChanged(it.toInt()) },
             valueRange = 1f..20f,
             steps = 18,
             modifier = Modifier.fillMaxWidth(),
@@ -68,7 +72,7 @@ fun ClassStep(
             val classDef = ClassData.ALL_CLASSES.find { it.name == character.className }
             val subclasses = classDef?.subclasses ?: emptyList()
             if (subclasses.isNotEmpty()) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(height = 16.dp))
                 SectionHeader(text = "Subclass")
 
                 var expanded by remember { mutableStateOf(false) }
@@ -80,9 +84,9 @@ fun ClassStep(
                         value = character.subclass ?: "Select subclass...",
                         onValueChange = {},
                         readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                            .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
@@ -93,16 +97,16 @@ fun ClassStep(
                             DropdownMenuItem(
                                 text = {
                                     Column {
-                                        Text(sub.name)
+                                        Text(text = sub.name)
                                         Text(
-                                            sub.description,
+                                            text = sub.description,
                                             style = MaterialTheme.typography.bodySmall,
                                             maxLines = 1,
                                         )
                                     }
                                 },
                                 onClick = {
-                                    viewModel.setSubclass(sub.name)
+                                    onSubclassSelected(sub.name)
                                     expanded = false
                                 },
                             )
@@ -111,5 +115,21 @@ fun ClassStep(
                 }
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ClassStepPreview() {
+    SessionZeroTheme {
+        ClassStep(character = PreviewData.sampleCharacter)
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ClassStepEmptyPreview() {
+    SessionZeroTheme {
+        ClassStep(character = PreviewData.emptyCharacter)
     }
 }
