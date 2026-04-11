@@ -102,10 +102,20 @@ fun ReviewStep(
 
         Spacer(Modifier.height(24.dp))
 
+        val nameValid = character.name.isNotBlank()
+        if (!nameValid) {
+            Text(
+                text = "Name is required before saving",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+
         Button(
             onClick = { viewModel.saveCharacter() },
             modifier = Modifier.fillMaxWidth(),
-            enabled = !isSaving,
+            enabled = !isSaving && nameValid,
         ) {
             if (isSaving) {
                 CircularProgressIndicator(modifier = Modifier.padding(4.dp))
