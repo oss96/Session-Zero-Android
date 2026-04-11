@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +30,6 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 fun ReviewStep(
     character: Character,
     derivedStats: DerivedStats,
-    isSaving: Boolean = false,
-    onSave: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -96,29 +92,6 @@ fun ReviewStep(
             }
         }
 
-        Spacer(modifier = Modifier.height(height = 24.dp))
-
-        val nameValid = character.name.isNotBlank()
-        if (!nameValid) {
-            Text(
-                text = "Name is required before saving",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-        }
-
-        Button(
-            onClick = onSave,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isSaving && nameValid,
-        ) {
-            if (isSaving) {
-                CircularProgressIndicator(modifier = Modifier.padding(all = 4.dp))
-            } else {
-                Text(text = "Save Character")
-            }
-        }
     }
 }
 
@@ -152,14 +125,3 @@ private fun ReviewStepPreview() {
     }
 }
 
-@PreviewLightDark
-@Composable
-private fun ReviewStepSavingPreview() {
-    SessionZeroTheme {
-        ReviewStep(
-            character = PreviewData.sampleCharacter,
-            derivedStats = PreviewData.sampleDerivedStats,
-            isSaving = true,
-        )
-    }
-}

@@ -77,6 +77,8 @@ fun WizardScreen(
         onStepClick = { viewModel.setStep(step = it) },
         onPrevious = { viewModel.previousStep() },
         onNext = { viewModel.nextStep() },
+        isSaving = isSaving,
+        onSave = { viewModel.saveCharacter() },
         stepContent = { page, pagerCharacter ->
             when (page) {
                 0 -> ClassStep(
@@ -130,8 +132,6 @@ fun WizardScreen(
                 7 -> ReviewStep(
                     character = pagerCharacter,
                     derivedStats = derivedStats,
-                    isSaving = isSaving,
-                    onSave = { viewModel.saveCharacter() },
                 )
             }
         },
@@ -149,6 +149,8 @@ fun WizardContent(
     onStepClick: (Int) -> Unit = {},
     onPrevious: () -> Unit = {},
     onNext: () -> Unit = {},
+    isSaving: Boolean = false,
+    onSave: () -> Unit = {},
     stepContent: @Composable (page: Int, character: Character) -> Unit = { _, _ -> },
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -219,6 +221,13 @@ fun WizardContent(
                         },
                     ) {
                         Text(text = "Next")
+                    }
+                } else {
+                    Button(
+                        onClick = onSave,
+                        enabled = !isSaving && character.name.isNotBlank(),
+                    ) {
+                        Text(text = if (isSaving) "Saving..." else "Save Character")
                     }
                 }
             }
