@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ossalali.sessionzero.ui.dashboard.DashboardScreen
+import com.ossalali.sessionzero.ui.wizard.WizardScreen
 
 @Composable
 fun AppNavigation() {
@@ -27,8 +28,10 @@ fun AppNavigation() {
                 )
             }
             entry<CreateWizard> { key ->
-                // TODO: Replace with WizardScreen in Phase 6
-                Text("Wizard for ${key.characterId ?: "new character"}")
+                WizardScreen(
+                    characterId = key.characterId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                )
             }
             entry<CharacterSheet> { key ->
                 // TODO: Replace with CharacterSheetScreen in Phase 8
