@@ -2,10 +2,9 @@ package com.ossalali.sessionzero.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,31 +22,40 @@ fun <T> SelectionGrid(
     modifier: Modifier = Modifier,
     columns: Int = 2,
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
-        modifier = modifier,
-        contentPadding = PaddingValues(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Column(
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(items) { item ->
-            DndCard(
-                selected = item == selectedItem,
-                onClick = { onSelect(item) },
+        items.chunked(columns).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Column {
-                    Text(
-                        text = label(item),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    if (description != null) {
-                        Text(
-                            text = description(item),
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2,
-                        )
+                rowItems.forEach { item ->
+                    DndCard(
+                        selected = item == selectedItem,
+                        onClick = { onSelect(item) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Column {
+                            Text(
+                                text = label(item),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            if (description != null) {
+                                Text(
+                                    text = description(item),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 2,
+                                )
+                            }
+                        }
                     }
+                }
+                // Fill remaining space if row is not full
+                repeat(columns - rowItems.size) {
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
