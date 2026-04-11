@@ -1,0 +1,137 @@
+package com.ossalali.sessionzero.ui.dashboard
+
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ossalali.sessionzero.domain.model.Character
+import com.ossalali.sessionzero.ui.common.ConfirmDialog
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DashboardScreen(
+    onCreateCharacter: () -> Unit,
+    onEditCharacter: (String) -> Unit,
+    onViewSheet: (String) -> Unit,
+    viewModel: DashboardViewModel = hiltViewModel(),
+) {
+    val characters by viewModel.characters.collectAsState()
+    val importError by viewModel.importError.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var deleteTarget by remember { mutableStateOf<Character?>(null) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            context.contentResolver.openInputStream(it)?.use { stream ->
+                val json = stream.bufferedReader().readText()
+                viewModel.onImportCharacter(json)
+            }
+        }
+    }
+
+    LaunchedEffect(importError) {
+        importError?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearImportError()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Session Zero") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                actions = {
+                    IconButton(onClick = { importLauncher.launch("application/json") }) {
+                        Icon(Icons.Default.FileOpen, contentDescription = "Import Character")
+                    }
+                },
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onCreateCharacter) {
+                Icon(Icons.Default.Add, contentDescription = "Create Character")
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { padding ->
+        if (characters.isEmpty()) {
+            EmptyState(modifier = Modifier.padding(padding))
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(characters, key = { it.id }) { character ->
+                    CharacterCard(
+                        character = character,
+                        onViewSheet = { onViewSheet(character.id) },
+                        onEdit = { onEditCharacter(character.id) },
+                        onExport = {
+                            val json = viewModel.onExportCharacter(character)
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, json)
+                                type = "application/json"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Export Character"))
+                        },
+                        onDelete = { deleteTarget = character },
+                    )
+                }
+            }
+        }
+    }
+
+    deleteTarget?.let { character ->
+        ConfirmDialog(
+            title = "Delete Character",
+            message = "Are you sure you want to delete ${character.name.ifEmpty { "this character" }}?",
+            onConfirm = {
+                viewModel.onDeleteCharacter(character.id)
+                deleteTarget = null
+            },
+            onDismiss = { deleteTarget = null },
+        )
+    }
+}

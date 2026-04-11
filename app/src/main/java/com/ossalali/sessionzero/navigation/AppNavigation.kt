@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.ossalali.sessionzero.ui.dashboard.DashboardScreen
 
 @Composable
 fun AppNavigation() {
@@ -19,15 +20,18 @@ fun AppNavigation() {
         ),
         entryProvider = entryProvider {
             entry<Dashboard> {
-                // TODO: Replace with DashboardScreen
-                Text("Dashboard - Coming Soon")
+                DashboardScreen(
+                    onCreateCharacter = { backStack.add(CreateWizard()) },
+                    onEditCharacter = { id -> backStack.add(CreateWizard(characterId = id)) },
+                    onViewSheet = { id -> backStack.add(CharacterSheet(characterId = id)) },
+                )
             }
             entry<CreateWizard> { key ->
-                // TODO: Replace with WizardScreen
+                // TODO: Replace with WizardScreen in Phase 6
                 Text("Wizard for ${key.characterId ?: "new character"}")
             }
             entry<CharacterSheet> { key ->
-                // TODO: Replace with CharacterSheetScreen
+                // TODO: Replace with CharacterSheetScreen in Phase 8
                 Text("Sheet for ${key.characterId}")
             }
         }
