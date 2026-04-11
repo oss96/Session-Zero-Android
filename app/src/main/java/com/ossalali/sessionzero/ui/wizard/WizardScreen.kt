@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,9 +25,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ossalali.sessionzero.domain.model.Character
+import com.ossalali.sessionzero.domain.model.DerivedStats
 import com.ossalali.sessionzero.ui.common.StepIndicator
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 import com.ossalali.sessionzero.ui.wizard.steps.AbilityScoresStep
 import com.ossalali.sessionzero.ui.wizard.steps.BackgroundStep
 import com.ossalali.sessionzero.ui.wizard.steps.ClassStep
@@ -37,7 +43,6 @@ import com.ossalali.sessionzero.ui.wizard.steps.SkillsStep
 import com.ossalali.sessionzero.ui.wizard.steps.SpeciesStep
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WizardScreen(
     viewModel: WizardViewModel = hiltViewModel(),
@@ -48,9 +53,6 @@ fun WizardScreen(
     val currentStep by viewModel.currentStep.collectAsState()
     val derivedStats by viewModel.derivedStats.collectAsState()
     val saveComplete by viewModel.saveComplete.collectAsState()
-    val scope = rememberCoroutineScope()
-
-    val pagerState = rememberPagerState(pageCount = { WizardViewModel.STEP_COUNT })
 
     LaunchedEffect(characterId) {
         if (characterId != null) {
@@ -58,25 +60,69 @@ fun WizardScreen(
         }
     }
 
-    LaunchedEffect(currentStep) {
-        pagerState.animateScrollToPage(currentStep)
-    }
-
     LaunchedEffect(saveComplete) {
         if (saveComplete) onNavigateBack()
+    }
+
+    WizardContent(
+        title = if (characterId != null) "Edit Character" else "Create Character",
+        character = character,
+        currentStep = currentStep,
+        derivedStats = derivedStats,
+        onNavigateBack = onNavigateBack,
+        onPrevious = { viewModel.previousStep() },
+        onNext = { viewModel.nextStep() },
+        stepContent = { page, pagerCharacter ->
+            when (page) {
+                0 -> ClassStep(character = pagerCharacter, viewModel = viewModel)
+                1 -> SpeciesStep(character = pagerCharacter, viewModel = viewModel)
+                2 -> BackgroundStep(character = pagerCharacter, viewModel = viewModel)
+                3 -> AbilityScoresStep(character = pagerCharacter, viewModel = viewModel)
+                4 -> SkillsStep(character = pagerCharacter, viewModel = viewModel)
+                5 -> EquipmentStep(character = pagerCharacter, viewModel = viewModel)
+                6 -> DetailsStep(character = pagerCharacter, viewModel = viewModel)
+                7 -> ReviewStep(
+                    character = pagerCharacter,
+                    derivedStats = derivedStats,
+                    viewModel = viewModel,
+                )
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WizardContent(
+    title: String = "Create Character",
+    character: Character = Character.empty(),
+    currentStep: Int = 0,
+    derivedStats: DerivedStats = DerivedStats(),
+    onNavigateBack: () -> Unit = {},
+    onPrevious: () -> Unit = {},
+    onNext: () -> Unit = {},
+    stepContent: @Composable (page: Int, character: Character) -> Unit = { _, _ -> },
+) {
+    val pagerState = rememberPagerState(
+        initialPage = currentStep,
+        pageCount = { WizardViewModel.STEP_COUNT },
+    )
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(currentStep) {
+        pagerState.animateScrollToPage(currentStep)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        if (characterId != null) "Edit Character" else "Create Character"
-                    )
-                },
+                title = { Text(text = title) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
                     }
                 },
             )
@@ -85,27 +131,27 @@ fun WizardScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(all = 16.dp),
             ) {
                 if (currentStep > 0) {
                     OutlinedButton(
                         onClick = {
-                            viewModel.previousStep()
+                            onPrevious()
                             scope.launch { pagerState.animateScrollToPage(currentStep - 1) }
                         },
                     ) {
-                        Text("Previous")
+                        Text(text = "Previous")
                     }
                 }
-                Spacer(Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(weight = 1f))
                 if (currentStep < WizardViewModel.STEP_COUNT - 1) {
                     Button(
                         onClick = {
-                            viewModel.nextStep()
+                            onNext()
                             scope.launch { pagerState.animateScrollToPage(currentStep + 1) }
                         },
                     ) {
-                        Text("Next")
+                        Text(text = "Next")
                     }
                 }
             }
@@ -114,7 +160,7 @@ fun WizardScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(paddingValues = padding),
         ) {
             StepIndicator(
                 steps = WizardViewModel.STEP_LABELS,
@@ -126,21 +172,45 @@ fun WizardScreen(
                 userScrollEnabled = false,
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
-                when (page) {
-                    0 -> ClassStep(character = character, viewModel = viewModel)
-                    1 -> SpeciesStep(character = character, viewModel = viewModel)
-                    2 -> BackgroundStep(character = character, viewModel = viewModel)
-                    3 -> AbilityScoresStep(character = character, viewModel = viewModel)
-                    4 -> SkillsStep(character = character, viewModel = viewModel)
-                    5 -> EquipmentStep(character = character, viewModel = viewModel)
-                    6 -> DetailsStep(character = character, viewModel = viewModel)
-                    7 -> ReviewStep(
-                        character = character,
-                        derivedStats = derivedStats,
-                        viewModel = viewModel,
-                    )
-                }
+                stepContent(page, character)
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun WizardScreenNewPreview() {
+    SessionZeroTheme {
+        WizardContent(
+            title = "Create Character",
+            currentStep = 0,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun WizardScreenMidStepPreview() {
+    SessionZeroTheme {
+        WizardContent(
+            title = "Edit Character",
+            character = PreviewData.sampleCharacter,
+            currentStep = 3,
+            derivedStats = PreviewData.sampleDerivedStats,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun WizardScreenLastStepPreview() {
+    SessionZeroTheme {
+        WizardContent(
+            title = "Create Character",
+            character = PreviewData.sampleCharacter,
+            currentStep = 7,
+            derivedStats = PreviewData.sampleDerivedStats,
+        )
     }
 }
