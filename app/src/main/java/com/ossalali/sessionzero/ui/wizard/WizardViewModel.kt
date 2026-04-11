@@ -55,9 +55,7 @@ class WizardViewModel @Inject constructor(
         .map { computeDerivedStats(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DerivedStats())
 
-    val hasUnsavedChanges: StateFlow<Boolean> = _character
-        .map { it != _initialCharacter }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    fun hasUnsavedChanges(): Boolean = _character.value != _initialCharacter
 
     fun initialize(characterId: String?) {
         _currentStep.value = 0

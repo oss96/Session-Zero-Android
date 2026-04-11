@@ -57,7 +57,6 @@ fun WizardScreen(
     val currentStep by viewModel.currentStep.collectAsState()
     val derivedStats by viewModel.derivedStats.collectAsState()
     val saveComplete by viewModel.saveComplete.collectAsState()
-    val hasUnsavedChanges by viewModel.hasUnsavedChanges.collectAsState()
 
     LaunchedEffect(characterId) {
         viewModel.initialize(characterId = characterId)
@@ -71,7 +70,7 @@ fun WizardScreen(
         title = if (characterId != null) "Edit Character" else "Create Character",
         character = character,
         currentStep = currentStep,
-        hasUnsavedChanges = hasUnsavedChanges,
+        checkUnsavedChanges = { viewModel.hasUnsavedChanges() },
         onNavigateBack = onNavigateBack,
         onStepClick = { viewModel.setStep(step = it) },
         onPrevious = { viewModel.previousStep() },
@@ -101,7 +100,7 @@ fun WizardContent(
     title: String = "Create Character",
     character: Character = Character.empty(),
     currentStep: Int = 0,
-    hasUnsavedChanges: Boolean = false,
+    checkUnsavedChanges: () -> Boolean = { false },
     onNavigateBack: () -> Unit = {},
     onStepClick: (Int) -> Unit = {},
     onPrevious: () -> Unit = {},
@@ -111,7 +110,7 @@ fun WizardContent(
     var showDiscardDialog by remember { mutableStateOf(false) }
 
     val tryNavigateBack: () -> Unit = {
-        if (hasUnsavedChanges) {
+        if (checkUnsavedChanges()) {
             showDiscardDialog = true
         } else {
             onNavigateBack()
