@@ -68,9 +68,10 @@ fun ClassStep(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        if (character.level >= 3 && character.className != null) {
-            val classDef = ClassData.ALL_CLASSES.find { it.name == character.className }
-            val subclasses = classDef?.subclasses ?: emptyList()
+        val classDef = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } }
+        val subclassLevel = classDef?.subclassLevel ?: 3
+        if (character.level >= subclassLevel && classDef != null) {
+            val subclasses = classDef.subclasses
             if (subclasses.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(height = 16.dp))
                 SectionHeader(text = "Subclass")
