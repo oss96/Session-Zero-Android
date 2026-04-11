@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,11 +42,23 @@ fun ClassStep(
     onLevelChanged: (Int) -> Unit = {},
     onSubclassSelected: (String?) -> Unit = {},
 ) {
+    val scrollState = rememberScrollState()
+    val classDef = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } }
+    val subclassLevel = classDef?.subclassLevel ?: 3
+    val showSubclass = character.level >= subclassLevel && classDef != null &&
+            classDef.subclasses.isNotEmpty()
+
+    LaunchedEffect(showSubclass) {
+        if (showSubclass) {
+            scrollState.animateScrollTo(value = scrollState.maxValue)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(all = 16.dp)
-            .verticalScroll(state = rememberScrollState()),
+            .verticalScroll(state = scrollState),
     ) {
         SectionHeader(text = "Choose Your Class")
 
@@ -68,50 +81,45 @@ fun ClassStep(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        val classDef = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } }
-        val subclassLevel = classDef?.subclassLevel ?: 3
-        if (character.level >= subclassLevel && classDef != null) {
-            val subclasses = classDef.subclasses
-            if (subclasses.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(height = 16.dp))
-                SectionHeader(text = "Subclass")
+        if (showSubclass && classDef != null) {
+            Spacer(modifier = Modifier.height(height = 16.dp))
+            SectionHeader(text = "Subclass")
 
-                var expanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
+            var expanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
+            ) {
+                OutlinedTextField(
+                    value = character.subclass ?: "Select subclass...",
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier
+                        .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                        .fillMaxWidth(),
+                )
+                ExposedDropdownMenu(
                     expanded = expanded,
-                    onExpandedChange = { expanded = it },
+                    onDismissRequest = { expanded = false },
                 ) {
-                    OutlinedTextField(
-                        value = character.subclass ?: "Select subclass...",
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        subclasses.forEach { sub ->
-                            DropdownMenuItem(
-                                text = {
-                                    Column {
-                                        Text(text = sub.name)
-                                        Text(
-                                            text = sub.description,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            maxLines = 1,
-                                        )
-                                    }
-                                },
-                                onClick = {
-                                    onSubclassSelected(sub.name)
-                                    expanded = false
-                                },
-                            )
-                        }
+                    classDef.subclasses.forEach { sub ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(text = sub.name)
+                                    Text(
+                                        text = sub.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                    )
+                                }
+                            },
+                            onClick = {
+                                onSubclassSelected(sub.name)
+                                expanded = false
+                            },
+                        )
                     }
                 }
             }
