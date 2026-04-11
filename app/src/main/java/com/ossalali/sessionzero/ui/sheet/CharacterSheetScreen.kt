@@ -21,15 +21,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ossalali.sessionzero.domain.model.Character
+import com.ossalali.sessionzero.domain.model.DerivedStats
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterSheetScreen(
     viewModel: CharacterSheetViewModel = hiltViewModel(),
     characterId: String,
-    onNavigateBack: () -> Unit={},
+    onNavigateBack: () -> Unit = {},
 ) {
     val character by viewModel.character.collectAsState()
     val derivedStats by viewModel.derivedStats.collectAsState()
@@ -39,13 +43,32 @@ fun CharacterSheetScreen(
         viewModel.loadCharacter(characterId)
     }
 
+    CharacterSheetContent(
+        character = character,
+        derivedStats = derivedStats,
+        isLoading = isLoading,
+        onNavigateBack = onNavigateBack,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CharacterSheetContent(
+    character: Character? = null,
+    derivedStats: DerivedStats = DerivedStats(),
+    isLoading: Boolean = false,
+    onNavigateBack: () -> Unit = {},
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(character?.name ?: "Character Sheet") },
+                title = { Text(text = character?.name ?: "Character Sheet") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
                     }
                 },
             )
@@ -55,7 +78,7 @@ fun CharacterSheetScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(paddingValues = padding),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
@@ -65,13 +88,43 @@ fun CharacterSheetScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(paddingValues = padding)
+                    .verticalScroll(state = rememberScrollState())
+                    .padding(all = 16.dp),
             ) {
                 SheetPage1(character = char, derivedStats = derivedStats)
                 SheetPage2(character = char, derivedStats = derivedStats)
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun CharacterSheetPreview() {
+    SessionZeroTheme {
+        CharacterSheetContent(
+            character = PreviewData.sampleCharacter,
+            derivedStats = PreviewData.sampleDerivedStats,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun CharacterSheetCasterPreview() {
+    SessionZeroTheme {
+        CharacterSheetContent(
+            character = PreviewData.sampleCasterCharacter,
+            derivedStats = PreviewData.sampleCasterDerivedStats,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun CharacterSheetLoadingPreview() {
+    SessionZeroTheme {
+        CharacterSheetContent(isLoading = true)
     }
 }
