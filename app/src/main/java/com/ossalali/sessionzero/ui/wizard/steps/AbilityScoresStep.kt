@@ -298,6 +298,7 @@ private fun ManualPanel(
     AbilityName.entries.forEach { ability ->
         val score = character.baseAbilityScores[ability]
         val label = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
+        var textValue by remember(score) { mutableStateOf(score.toString()) }
 
         Row(
             modifier = Modifier
@@ -308,10 +309,14 @@ private fun ManualPanel(
         ) {
             Text(text = label, modifier = Modifier.width(width = 100.dp))
             OutlinedTextField(
-                value = score.toString(),
+                value = textValue,
                 onValueChange = { input ->
-                    val newVal = input.toIntOrNull()?.coerceIn(1, 30) ?: return@OutlinedTextField
-                    onBaseScoreChanged(ability, newVal)
+                    val filtered = input.filter { it.isDigit() }
+                    textValue = filtered
+                    val parsed = filtered.toIntOrNull()
+                    if (parsed != null) {
+                        onBaseScoreChanged(ability, parsed.coerceIn(1, 30))
+                    }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.width(width = 80.dp),
