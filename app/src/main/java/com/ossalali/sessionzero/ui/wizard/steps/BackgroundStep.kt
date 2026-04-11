@@ -1,5 +1,11 @@
 package com.ossalali.sessionzero.ui.wizard.steps
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,13 +28,16 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityName
@@ -36,6 +45,7 @@ import com.ossalali.sessionzero.domain.model.AbilityScores
 import com.ossalali.sessionzero.domain.model.BackgroundName
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.rules.BackgroundData
+import com.ossalali.sessionzero.ui.common.DndCard
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.common.SelectionGrid
 import com.ossalali.sessionzero.ui.preview.PreviewData
@@ -48,6 +58,10 @@ fun BackgroundStep(
     onBackgroundSelected: (BackgroundName) -> Unit = {},
     onAbilityBonusesChanged: (Map<AbilityName, Int>) -> Unit = {},
 ) {
+    val bgDef = character.background?.let { name -> BackgroundData.ALL_BACKGROUNDS.find { it.name == name } }
+    var userExpandedGrid by remember { mutableStateOf(false) }
+    val showCollapsed = bgDef != null && !userExpandedGrid
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,15 +70,53 @@ fun BackgroundStep(
     ) {
         SectionHeader(text = "Choose Your Background")
 
-        SelectionGrid(
-            items = BackgroundData.ALL_BACKGROUNDS,
-            selectedItem = character.background?.let { name -> BackgroundData.ALL_BACKGROUNDS.find { it.name == name } },
-            onSelect = { onBackgroundSelected(it.name) },
-            label = { it.name.displayName },
-            description = { it.description },
-        )
-
-        val bgDef = character.background?.let { name -> BackgroundData.ALL_BACKGROUNDS.find { it.name == name } }
+        AnimatedContent(
+            targetState = showCollapsed,
+            transitionSpec = {
+                (fadeIn() + slideInVertically())
+                    .togetherWith(fadeOut() + slideOutVertically())
+            },
+            label = "backgroundGridCollapse",
+        ) { collapsed ->
+            if (collapsed && bgDef != null) {
+                DndCard(
+                    selected = true,
+                    onClick = { userExpandedGrid = true },
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(weight = 1f)) {
+                            Text(
+                                text = bgDef.name.displayName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = bgDef.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2,
+                            )
+                        }
+                        TextButton(onClick = { userExpandedGrid = true }) {
+                            Text(text = "Change")
+                        }
+                    }
+                }
+            } else {
+                SelectionGrid(
+                    items = BackgroundData.ALL_BACKGROUNDS,
+                    selectedItem = bgDef,
+                    onSelect = {
+                        onBackgroundSelected(it.name)
+                        userExpandedGrid = false
+                    },
+                    label = { it.name.displayName },
+                    description = { it.description },
+                )
+            }
+        }
 
         if (bgDef != null) {
             Spacer(modifier = Modifier.height(height = 16.dp))
@@ -214,8 +266,16 @@ private fun ThreeAbilityPicker(
 
 @PreviewLightDark
 @Composable
-private fun BackgroundStepPreview() {
+private fun BackgroundStepSelectedPreview() {
     SessionZeroTheme {
         BackgroundStep(character = PreviewData.sampleCharacter)
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun BackgroundStepEmptyPreview() {
+    SessionZeroTheme {
+        BackgroundStep(character = PreviewData.emptyCharacter)
     }
 }
