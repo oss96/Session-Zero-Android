@@ -17,12 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityName
-import com.ossalali.sessionzero.domain.model.AbilityScores
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.DerivedStats
 import com.ossalali.sessionzero.domain.rules.GameRules
@@ -44,7 +42,7 @@ fun ReviewStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Character Summary")
+        SectionHeader(text = "Character Summary")
 
         // Basic Info
         ReviewRow("Name", character.name.ifEmpty { "Unnamed" })
@@ -57,7 +55,7 @@ fun ReviewStep(
         character.alignment?.let { ReviewRow("Alignment", it.displayName) }
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Ability Scores")
+        SectionHeader(text = "Ability Scores")
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -69,13 +67,13 @@ fun ReviewStep(
                 AbilityScoreBox(
                     label = ability.name,
                     score = score,
-                    modifier = GameRules.abilityModifier(score),
+                    signModifier = GameRules.abilityModifier(score),
                 )
             }
         }
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Combat Stats")
+        SectionHeader(text = "Combat Stats")
 
         ReviewRow("Max HP", "${derivedStats.maxHP}")
         ReviewRow("AC", "${derivedStats.armorClass}")
@@ -88,13 +86,13 @@ fun ReviewStep(
 
         if (character.skillProficiencies.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            SectionHeader("Skill Proficiencies")
+            SectionHeader(text = "Skill Proficiencies")
             Text(character.skillProficiencies.joinToString(", ") { it.displayName })
         }
 
         if (character.equipment.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            SectionHeader("Equipment")
+            SectionHeader(text = "Equipment")
             character.equipment.forEach { item ->
                 Text("- ${item.name}${if (item.quantity > 1) " x${item.quantity}" else ""}")
             }

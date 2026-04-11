@@ -49,7 +49,7 @@ fun BackgroundStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Choose Your Background")
+        SectionHeader(text = "Choose Your Background")
 
         SelectionGrid(
             items = BackgroundData.ALL_BACKGROUNDS,
@@ -63,10 +63,10 @@ fun BackgroundStep(
 
         if (bgDef != null) {
             Spacer(Modifier.height(16.dp))
-            SectionHeader("Origin Feat: ${bgDef.originFeat}")
+            SectionHeader(text = "Origin Feat: ${bgDef.originFeat}")
 
             Spacer(Modifier.height(8.dp))
-            SectionHeader("Ability Score Bonuses")
+            SectionHeader(text = "Ability Score Bonuses")
             Text(
                 text = "Choose +2/+1 to two abilities, or +1/+1/+1 to three abilities",
                 style = MaterialTheme.typography.bodySmall,

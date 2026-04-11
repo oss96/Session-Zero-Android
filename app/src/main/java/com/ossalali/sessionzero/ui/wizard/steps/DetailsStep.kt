@@ -39,7 +39,7 @@ fun DetailsStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Character Details")
+        SectionHeader(text = "Character Details")
 
         OutlinedTextField(
             value = character.name,
@@ -92,7 +92,7 @@ fun DetailsStep(
         }
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Appearance")
+        SectionHeader(text = "Appearance")
 
         val appearance = character.appearance
         listOf(
@@ -125,7 +125,7 @@ fun DetailsStep(
         }
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Personality")
+        SectionHeader(text = "Personality")
 
         OutlinedTextField(
             value = character.personalityTraits,
@@ -160,7 +160,7 @@ fun DetailsStep(
         )
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Backstory")
+        SectionHeader(text = "Backstory")
 
         OutlinedTextField(
             value = character.backstory,

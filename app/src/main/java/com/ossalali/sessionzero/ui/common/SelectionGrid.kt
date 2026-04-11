@@ -11,17 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun <T> SelectionGrid(
+    modifier: Modifier = Modifier,
     items: List<T>,
     selectedItem: T?,
-    onSelect: (T) -> Unit,
+    onSelect: (T) -> Unit = {},
     label: (T) -> String,
     description: ((T) -> String)? = null,
-    modifier: Modifier = Modifier,
     columns: Int = 2,
 ) {
     Column(
@@ -64,15 +65,14 @@ fun <T> SelectionGrid(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun SelectionGridPreview() {
     val items = listOf("Fighter", "Wizard", "Rogue", "Cleric", "Ranger")
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         SelectionGrid(
             items = items,
             selectedItem = "Wizard",
-            onSelect = {},
             label = { it },
             description = { "A $it class" },
             modifier = Modifier.padding(16.dp),

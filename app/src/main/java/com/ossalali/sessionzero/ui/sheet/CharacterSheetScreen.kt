@@ -27,9 +27,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterSheetScreen(
-    characterId: String,
-    onNavigateBack: () -> Unit,
     viewModel: CharacterSheetViewModel = hiltViewModel(),
+    characterId: String,
+    onNavigateBack: () -> Unit={},
 ) {
     val character by viewModel.character.collectAsState()
     val derivedStats by viewModel.derivedStats.collectAsState()

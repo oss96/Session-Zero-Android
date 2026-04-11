@@ -29,7 +29,7 @@ fun SpeciesStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Choose Your Species")
+        SectionHeader(text = "Choose Your Species")
 
         SelectionGrid(
             items = SpeciesData.ALL_SPECIES,
@@ -43,7 +43,7 @@ fun SpeciesStep(
 
         if (speciesDef != null && speciesDef.lineageOptions.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            SectionHeader("Lineage")
+            SectionHeader(text = "Lineage")
 
             Column {
                 speciesDef.lineageOptions.forEach { option ->
@@ -59,7 +59,7 @@ fun SpeciesStep(
 
         if (speciesDef != null && speciesDef.traits.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            SectionHeader("Traits")
+            SectionHeader(text = "Traits")
 
             speciesDef.traits.forEach { trait ->
                 Text(

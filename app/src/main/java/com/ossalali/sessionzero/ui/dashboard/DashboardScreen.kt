@@ -32,25 +32,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.ui.common.ConfirmDialog
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
+    viewModel: DashboardViewModel = hiltViewModel(),
     onCreateCharacter: () -> Unit,
     onEditCharacter: (String) -> Unit,
     onViewSheet: (String) -> Unit,
-    viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val characters by viewModel.characters.collectAsState()
     val importError by viewModel.importError.collectAsState()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    var deleteTarget by remember { mutableStateOf<Character?>(null) }
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -63,10 +62,47 @@ fun DashboardScreen(
         }
     }
 
+    DashboardContent(
+        characters = characters,
+        importError = importError,
+        onCreateCharacter = onCreateCharacter,
+        onEditCharacter = onEditCharacter,
+        onViewSheet = onViewSheet,
+        onImportClick = { importLauncher.launch("application/json") },
+        onExportCharacter = { character ->
+            val json = viewModel.onExportCharacter(character)
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, json)
+                type = "application/json"
+            }
+            context.startActivity(Intent.createChooser(sendIntent, "Export Character"))
+        },
+        onDeleteCharacter = { viewModel.onDeleteCharacter(it) },
+        onImportErrorShown = { viewModel.clearImportError() },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DashboardContent(
+    characters: List<Character>,
+    importError: String? = null,
+    onCreateCharacter: () -> Unit = {},
+    onEditCharacter: (String) -> Unit = {},
+    onViewSheet: (String) -> Unit = {},
+    onImportClick: () -> Unit = {},
+    onExportCharacter: (Character) -> Unit = {},
+    onDeleteCharacter: (String) -> Unit = {},
+    onImportErrorShown: () -> Unit = {},
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    var deleteTarget by remember { mutableStateOf<Character?>(null) }
+
     LaunchedEffect(importError) {
         importError?.let {
             snackbarHostState.showSnackbar(it)
-            viewModel.clearImportError()
+            onImportErrorShown()
         }
     }
 
@@ -79,7 +115,7 @@ fun DashboardScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 actions = {
-                    IconButton(onClick = { importLauncher.launch("application/json") }) {
+                    IconButton(onClick = onImportClick) {
                         Icon(Icons.Default.FileOpen, contentDescription = "Import Character")
                     }
                 },
@@ -107,15 +143,7 @@ fun DashboardScreen(
                         character = character,
                         onViewSheet = { onViewSheet(character.id) },
                         onEdit = { onEditCharacter(character.id) },
-                        onExport = {
-                            val json = viewModel.onExportCharacter(character)
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, json)
-                                type = "application/json"
-                            }
-                            context.startActivity(Intent.createChooser(sendIntent, "Export Character"))
-                        },
+                        onExport = { onExportCharacter(character) },
                         onDelete = { deleteTarget = character },
                     )
                 }
@@ -128,10 +156,31 @@ fun DashboardScreen(
             title = "Delete Character",
             message = "Are you sure you want to delete ${character.name.ifEmpty { "this character" }}?",
             onConfirm = {
-                viewModel.onDeleteCharacter(character.id)
+                onDeleteCharacter(character.id)
                 deleteTarget = null
             },
             onDismiss = { deleteTarget = null },
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DashboardEmptyPreview() {
+    SessionZeroTheme {
+        DashboardContent(characters = emptyList())
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DashboardWithCharactersPreview() {
+    SessionZeroTheme {
+        DashboardContent(
+            characters = listOf(
+                PreviewData.sampleCharacter,
+                PreviewData.sampleCasterCharacter,
+            ),
         )
     }
 }

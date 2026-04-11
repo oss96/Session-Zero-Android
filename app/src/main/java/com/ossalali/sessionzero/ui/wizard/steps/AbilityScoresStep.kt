@@ -66,7 +66,7 @@ fun AbilityScoresStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Ability Scores")
+        SectionHeader(text = "Ability Scores")
 
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             methodLabels.forEachIndexed { index, label ->

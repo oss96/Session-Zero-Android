@@ -40,9 +40,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WizardScreen(
-    characterId: String?,
-    onNavigateBack: () -> Unit,
     viewModel: WizardViewModel = hiltViewModel(),
+    characterId: String?,
+    onNavigateBack: () -> Unit = {},
 ) {
     val character by viewModel.character.collectAsState()
     val currentStep by viewModel.currentStep.collectAsState()

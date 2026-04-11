@@ -45,7 +45,7 @@ fun SkillsStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Skill Proficiencies")
+        SectionHeader(text = "Skill Proficiencies")
 
         if (backgroundSkills.isNotEmpty()) {
             Text(

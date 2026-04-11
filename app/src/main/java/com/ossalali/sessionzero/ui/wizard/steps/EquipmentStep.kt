@@ -53,7 +53,7 @@ fun EquipmentStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Equipment")
+        SectionHeader(text = "Equipment")
 
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             SegmentedButton(
@@ -102,7 +102,7 @@ fun EquipmentStep(
         }
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Inventory")
+        SectionHeader(text = "Inventory")
 
         character.equipment.forEachIndexed { index, item ->
             Row(

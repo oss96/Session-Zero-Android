@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
@@ -13,8 +14,8 @@ fun ConfirmDialog(
     message: String,
     confirmText: String = "Delete",
     dismissText: String = "Cancel",
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {},
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -33,15 +34,13 @@ fun ConfirmDialog(
     )
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun ConfirmDialogPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         ConfirmDialog(
             title = "Delete Character",
             message = "Are you sure you want to delete Thorn Ironforge?",
-            onConfirm = {},
-            onDismiss = {},
         )
     }
 }

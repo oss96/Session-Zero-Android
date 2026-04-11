@@ -43,7 +43,7 @@ fun ClassStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader("Choose Your Class")
+        SectionHeader(text = "Choose Your Class")
 
         SelectionGrid(
             items = ClassData.ALL_CLASSES,
@@ -55,7 +55,7 @@ fun ClassStep(
 
         Spacer(Modifier.height(16.dp))
 
-        SectionHeader("Level: ${character.level}")
+        SectionHeader(text = "Level: ${character.level}")
         Slider(
             value = character.level.toFloat(),
             onValueChange = { viewModel.setLevel(it.toInt()) },
@@ -69,7 +69,7 @@ fun ClassStep(
             val subclasses = classDef?.subclasses ?: emptyList()
             if (subclasses.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
-                SectionHeader("Subclass")
+                SectionHeader(text = "Subclass")
 
                 var expanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(

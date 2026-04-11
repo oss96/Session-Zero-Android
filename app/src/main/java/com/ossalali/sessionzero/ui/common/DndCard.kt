@@ -11,14 +11,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun DndCard(
+    modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Card(
@@ -41,10 +42,10 @@ fun DndCard(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun DndCardPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DndCard(selected = false) {
                 Text("Unselected Card")

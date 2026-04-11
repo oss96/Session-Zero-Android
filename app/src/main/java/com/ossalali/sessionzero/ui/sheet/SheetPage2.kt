@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.DerivedStats
@@ -36,7 +37,7 @@ fun SheetPage2(
     if (character.personalityTraits.isNotEmpty() || character.ideals.isNotEmpty() ||
         character.bonds.isNotEmpty() || character.flaws.isNotEmpty()
     ) {
-        SectionHeader("Personality")
+        SectionHeader(text = "Personality")
         if (character.personalityTraits.isNotEmpty()) {
             Text("Traits: ${character.personalityTraits}", style = MaterialTheme.typography.bodyMedium)
         }
@@ -54,14 +55,14 @@ fun SheetPage2(
 
     // Backstory
     if (character.backstory.isNotEmpty()) {
-        SectionHeader("Backstory")
+        SectionHeader(text = "Backstory")
         Text(character.backstory, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(16.dp))
     }
 
     // Equipment
     if (character.equipment.isNotEmpty()) {
-        SectionHeader("Equipment")
+        SectionHeader(text = "Equipment")
         character.equipment.forEach { item ->
             Text(
                 "- ${item.name}${if (item.quantity > 1) " x${item.quantity}" else ""}",
@@ -87,7 +88,7 @@ fun SheetPage2(
         ClassData.ALL_CLASSES.find { c -> c.name == it }
     }
     if (classDef?.spellcasting != null) {
-        SectionHeader("Spellcasting")
+        SectionHeader(text = "Spellcasting")
         derivedStats.spellSaveDC?.let {
             Text("Spell Save DC: $it", style = MaterialTheme.typography.bodyMedium)
         }
@@ -127,7 +128,7 @@ fun SheetPage2(
         val features = classDef.features.filter { it.key <= character.level }
             .flatMap { it.value }
         if (features.isNotEmpty()) {
-            SectionHeader("Features & Traits")
+            SectionHeader(text = "Features & Traits")
             features.forEach { feature ->
                 Text(feature.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Text(feature.description, style = MaterialTheme.typography.bodySmall)
@@ -139,14 +140,14 @@ fun SheetPage2(
 
     // Feats
     if (character.feats.isNotEmpty()) {
-        SectionHeader("Feats")
+        SectionHeader(text = "Feats")
         character.feats.forEach { Text("- $it") }
         Spacer(Modifier.height(16.dp))
     }
 
     // Languages
     if (character.languages.isNotEmpty()) {
-        SectionHeader("Languages")
+        SectionHeader(text = "Languages")
         Text(character.languages.joinToString(", "))
         Spacer(Modifier.height(16.dp))
     }
@@ -158,7 +159,7 @@ fun SheetPage2(
         appearance.eyes, appearance.skin, appearance.hair,
     ).any { it.isNotEmpty() }
     if (hasAppearance) {
-        SectionHeader("Appearance")
+        SectionHeader(text = "Appearance")
         if (appearance.age.isNotEmpty()) Text("Age: ${appearance.age}")
         if (appearance.height.isNotEmpty()) Text("Height: ${appearance.height}")
         if (appearance.weight.isNotEmpty()) Text("Weight: ${appearance.weight}")
@@ -171,23 +172,23 @@ fun SheetPage2(
 
     // Allies
     if (character.alliesAndOrganizations.isNotEmpty()) {
-        SectionHeader("Allies & Organizations")
+        SectionHeader(text = "Allies & Organizations")
         Text(character.alliesAndOrganizations)
         Spacer(Modifier.height(16.dp))
     }
 
     // Notes
     if (character.additionalNotes.isNotEmpty()) {
-        SectionHeader("Additional Notes")
+        SectionHeader(text = "Additional Notes")
         Text(character.additionalNotes)
         Spacer(Modifier.height(16.dp))
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun SheetPage2Preview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -201,10 +202,10 @@ private fun SheetPage2Preview() {
     }
 }
 
-@Preview(showBackground = true, name = "Sheet Page 2 - Caster")
+@PreviewLightDark
 @Composable
 private fun SheetPage2CasterPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())

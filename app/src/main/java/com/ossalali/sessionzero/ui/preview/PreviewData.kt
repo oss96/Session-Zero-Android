@@ -14,7 +14,6 @@ import com.ossalali.sessionzero.domain.model.SpeciesName
 import com.ossalali.sessionzero.domain.model.Weapon
 
 object PreviewData {
-
     val sampleCharacter = Character(
         id = "preview-1",
         name = "Thorn Ironforge",

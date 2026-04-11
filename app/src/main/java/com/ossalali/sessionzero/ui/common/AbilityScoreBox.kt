@@ -14,21 +14,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun AbilityScoreBox(
+    modifier: Modifier = Modifier,
     label: String,
     score: Int,
-    modifier: Int,
-    boxModifier: Modifier = Modifier,
+    signModifier: Int,
 ) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
-        modifier = boxModifier.width(64.dp),
+        modifier = modifier.width(64.dp),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -43,9 +44,9 @@ fun AbilityScoreBox(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            val sign = if (modifier >= 0) "+" else ""
+            val sign = if (signModifier >= 0) "+" else ""
             Text(
-                text = "$sign$modifier",
+                text = "$sign$signModifier",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -53,17 +54,17 @@ fun AbilityScoreBox(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun AbilityScoreBoxPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Row(
             modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            AbilityScoreBox(label = "STR", score = 18, modifier = 4)
-            AbilityScoreBox(label = "DEX", score = 14, modifier = 2)
-            AbilityScoreBox(label = "CON", score = 8, modifier = -1)
+            AbilityScoreBox(label = "STR", score = 18, signModifier = 4)
+            AbilityScoreBox(label = "DEX", score = 14, signModifier = 2)
+            AbilityScoreBox(label = "CON", score = 8, signModifier = -1)
         }
     }
 }

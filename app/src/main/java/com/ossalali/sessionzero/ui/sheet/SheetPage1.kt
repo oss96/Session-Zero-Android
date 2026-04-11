@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.ui.preview.PreviewData
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
@@ -61,7 +62,7 @@ fun SheetPage1(
     Spacer(Modifier.height(16.dp))
 
     // Ability Scores
-    SectionHeader("Ability Scores")
+    SectionHeader(text = "Ability Scores")
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -72,7 +73,7 @@ fun SheetPage1(
             AbilityScoreBox(
                 label = ability.name,
                 score = score,
-                modifier = GameRules.abilityModifier(score),
+                signModifier = GameRules.abilityModifier(score),
             )
         }
     }
@@ -80,7 +81,7 @@ fun SheetPage1(
     Spacer(Modifier.height(16.dp))
 
     // Saving Throws
-    SectionHeader("Saving Throws")
+    SectionHeader(text = "Saving Throws")
     val classDef = character.className?.let {
         com.ossalali.sessionzero.domain.rules.ClassData.ALL_CLASSES.find { c -> c.name == it }
     }
@@ -97,7 +98,7 @@ fun SheetPage1(
     Spacer(Modifier.height(16.dp))
 
     // Skills
-    SectionHeader("Skills")
+    SectionHeader(text = "Skills")
     SkillName.entries.forEach { skill ->
         val bonus = derivedStats.skillBonuses[skill] ?: 0
         val isProficient = skill in character.skillProficiencies
@@ -111,7 +112,7 @@ fun SheetPage1(
     Spacer(Modifier.height(16.dp))
 
     // Combat Stats
-    SectionHeader("Combat")
+    SectionHeader(text = "Combat")
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -139,7 +140,7 @@ fun SheetPage1(
     // Weapons
     if (character.weapons.isNotEmpty()) {
         Spacer(Modifier.height(16.dp))
-        SectionHeader("Weapons")
+        SectionHeader(text = "Weapons")
         character.weapons.forEach { weapon ->
             Text(
                 "${weapon.name}: ${weapon.attackBonus.ifEmpty { "—" }} | ${weapon.damage.ifEmpty { "—" }}",
@@ -166,10 +167,10 @@ private fun CombatStatCard(label: String, value: String) {
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun SheetPage1Preview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -183,10 +184,10 @@ private fun SheetPage1Preview() {
     }
 }
 
-@Preview(showBackground = true, name = "Sheet Page 1 - Caster")
+@PreviewLightDark
 @Composable
 private fun SheetPage1CasterPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.ui.preview.PreviewData
@@ -30,12 +31,12 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun CharacterCard(
-    character: Character,
-    onViewSheet: () -> Unit,
-    onEdit: () -> Unit,
-    onExport: () -> Unit,
-    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    character: Character,
+    onViewSheet: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onExport: () -> Unit = {},
+    onDelete: () -> Unit = {},
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -93,47 +94,25 @@ fun CharacterCard(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun CharacterCardPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         CharacterCard(
             character = PreviewData.sampleCharacter,
-            onViewSheet = {},
-            onEdit = {},
-            onExport = {},
-            onDelete = {},
             modifier = Modifier.padding(16.dp),
         )
     }
 }
 
-@Preview(showBackground = true, name = "CharacterCard - Empty")
+@PreviewLightDark
 @Composable
 private fun CharacterCardEmptyPreview() {
-    SessionZeroTheme(dynamicColor = false) {
+    SessionZeroTheme {
         CharacterCard(
             character = PreviewData.emptyCharacter,
-            onViewSheet = {},
-            onEdit = {},
-            onExport = {},
-            onDelete = {},
             modifier = Modifier.padding(16.dp),
         )
     }
 }
 
-@Preview(showBackground = true, name = "CharacterCard - Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun CharacterCardDarkPreview() {
-    SessionZeroTheme(dynamicColor = false) {
-        CharacterCard(
-            character = PreviewData.sampleCharacter,
-            onViewSheet = {},
-            onEdit = {},
-            onExport = {},
-            onDelete = {},
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
