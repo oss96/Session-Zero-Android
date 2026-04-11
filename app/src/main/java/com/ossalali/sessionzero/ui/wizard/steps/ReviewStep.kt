@@ -2,6 +2,7 @@ package com.ossalali.sessionzero.ui.wizard.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,7 +52,7 @@ fun ReviewStep(
         Spacer(modifier = Modifier.height(height = 16.dp))
         SectionHeader(text = "Ability Scores")
 
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
@@ -59,6 +60,7 @@ fun ReviewStep(
             AbilityName.entries.forEach { ability ->
                 val score = scores[ability]
                 AbilityScoreBox(
+                    modifier = Modifier.padding(8.dp),
                     label = ability.name,
                     score = score,
                     signModifier = GameRules.abilityModifier(score),
