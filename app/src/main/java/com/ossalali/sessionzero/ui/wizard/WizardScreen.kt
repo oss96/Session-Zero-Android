@@ -55,9 +55,7 @@ fun WizardScreen(
     val saveComplete by viewModel.saveComplete.collectAsState()
 
     LaunchedEffect(characterId) {
-        if (characterId != null) {
-            viewModel.loadCharacter(characterId)
-        }
+        viewModel.initialize(characterId = characterId)
     }
 
     LaunchedEffect(saveComplete) {

@@ -51,13 +51,20 @@ class WizardViewModel @Inject constructor(
         .map { computeDerivedStats(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DerivedStats())
 
-    fun loadCharacter(characterId: String) {
-        viewModelScope.launch {
-            getCharacterUseCase(characterId).collect { loaded ->
-                if (loaded != null) {
-                    _character.value = loaded
+    fun initialize(characterId: String?) {
+        _currentStep.value = 0
+        _saveComplete.value = false
+        _isSaving.value = false
+        if (characterId != null) {
+            viewModelScope.launch {
+                getCharacterUseCase(characterId).collect { loaded ->
+                    if (loaded != null) {
+                        _character.value = loaded
+                    }
                 }
             }
+        } else {
+            _character.value = Character.empty()
         }
     }
 
