@@ -1,16 +1,17 @@
 package com.ossalali.sessionzero.ui.common
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -25,35 +26,35 @@ fun StepIndicator(
     currentStep: Int,
     onStepClick: (Int) -> Unit = {},
 ) {
-    val scrollState = rememberScrollState()
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(state = scrollState)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(space = 4.dp),
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(currentStep) {
+        listState.animateScrollToItem(index = currentStep)
+    }
+
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        steps.forEachIndexed { index, label ->
+        itemsIndexed(items = steps) { index, label ->
             val selected = index <= currentStep
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
                 InputChip(
                     selected = selected,
                     onClick = { onStepClick(index) },
                     label = {
                         Text(
-                            text = "${index + 1}",
+                            text = label,
+                            textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.labelSmall,
                         )
-                    })
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    modifier = Modifier.padding(top = 2.dp),
+                    },
                 )
             }
         }
@@ -73,7 +74,7 @@ private fun StepIndicatorPreview() {
                 "Skills",
                 "Equipment",
                 "Details",
-                "Review"
+                "Review",
             ),
             currentStep = 3,
         )
