@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -295,10 +300,15 @@ private fun ManualPanel(
     character: Character,
     onBaseScoreChanged: (AbilityName, Int) -> Unit,
 ) {
-    AbilityName.entries.forEach { ability ->
+    val abilities = AbilityName.entries
+    val focusRequesters = remember { abilities.map { FocusRequester() } }
+    val focusManager = LocalFocusManager.current
+
+    abilities.forEachIndexed { index, ability ->
         val score = character.baseAbilityScores[ability]
         val label = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
         var textValue by remember(score) { mutableStateOf(score.toString()) }
+        val isLast = index == abilities.lastIndex
 
         Row(
             modifier = Modifier
@@ -318,8 +328,17 @@ private fun ManualPanel(
                         onBaseScoreChanged(ability, parsed.coerceIn(1, 30))
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.width(width = 80.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = if (isLast) ImeAction.Done else ImeAction.Next,
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusRequesters[index + 1].requestFocus() },
+                    onDone = { focusManager.clearFocus() },
+                ),
+                modifier = Modifier
+                    .width(width = 80.dp)
+                    .focusRequester(focusRequester = focusRequesters[index]),
                 singleLine = true,
             )
         }
