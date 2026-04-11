@@ -41,8 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -307,7 +310,10 @@ private fun ManualPanel(
     abilities.forEachIndexed { index, ability ->
         val score = character.baseAbilityScores[ability]
         val label = AbilityScores.ABILITY_LABELS[ability] ?: ability.name
-        var textValue by remember(score) { mutableStateOf(score.toString()) }
+        val scoreText = score.toString()
+        var textFieldValue by remember(score) {
+            mutableStateOf(TextFieldValue(text = scoreText, selection = TextRange(scoreText.length)))
+        }
         val isLast = index == abilities.lastIndex
 
         Row(
@@ -319,10 +325,10 @@ private fun ManualPanel(
         ) {
             Text(text = label, modifier = Modifier.width(width = 100.dp))
             OutlinedTextField(
-                value = textValue,
-                onValueChange = { input ->
-                    val filtered = input.filter { it.isDigit() }
-                    textValue = filtered
+                value = textFieldValue,
+                onValueChange = { newValue ->
+                    val filtered = newValue.text.filter { it.isDigit() }
+                    textFieldValue = newValue.copy(text = filtered)
                     val parsed = filtered.toIntOrNull()
                     if (parsed != null) {
                         onBaseScoreChanged(ability, parsed.coerceIn(1, 30))
@@ -338,7 +344,14 @@ private fun ManualPanel(
                 ),
                 modifier = Modifier
                     .width(width = 80.dp)
-                    .focusRequester(focusRequester = focusRequesters[index]),
+                    .focusRequester(focusRequester = focusRequesters[index])
+                    .onFocusChanged { state ->
+                        if (state.isFocused) {
+                            textFieldValue = textFieldValue.copy(
+                                selection = TextRange(start = 0, end = textFieldValue.text.length),
+                            )
+                        }
+                    },
                 singleLine = true,
             )
         }
