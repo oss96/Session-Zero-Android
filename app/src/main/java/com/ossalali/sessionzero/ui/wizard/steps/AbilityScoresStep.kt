@@ -328,10 +328,17 @@ private fun ManualPanel(
                 value = textFieldValue,
                 onValueChange = { newValue ->
                     val filtered = newValue.text.filter { it.isDigit() }
-                    textFieldValue = newValue.copy(text = filtered)
                     val parsed = filtered.toIntOrNull()
                     if (parsed != null) {
-                        onBaseScoreChanged(ability, parsed.coerceIn(1, 30))
+                        val clamped = parsed.coerceIn(1, 30)
+                        val clampedText = clamped.toString()
+                        textFieldValue = TextFieldValue(
+                            text = clampedText,
+                            selection = TextRange(index = clampedText.length),
+                        )
+                        onBaseScoreChanged(ability, clamped)
+                    } else {
+                        textFieldValue = newValue.copy(text = filtered)
                     }
                 },
                 keyboardOptions = KeyboardOptions(
