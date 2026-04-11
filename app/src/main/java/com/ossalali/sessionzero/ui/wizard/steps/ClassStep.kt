@@ -1,6 +1,13 @@
 package com.ossalali.sessionzero.ui.wizard.steps
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,17 +24,21 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.ClassName
 import com.ossalali.sessionzero.domain.rules.ClassData
+import com.ossalali.sessionzero.ui.common.DndCard
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.common.SelectionGrid
 import com.ossalali.sessionzero.ui.preview.PreviewData
@@ -41,6 +52,10 @@ fun ClassStep(
     onLevelChanged: (Int) -> Unit = {},
     onSubclassSelected: (String?) -> Unit = {},
 ) {
+    val classDef = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } }
+    var userExpandedGrid by remember { mutableStateOf(false) }
+    val showCollapsed = classDef != null && !userExpandedGrid
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,13 +64,52 @@ fun ClassStep(
     ) {
         SectionHeader(text = "Choose Your Class")
 
-        SelectionGrid(
-            items = ClassData.ALL_CLASSES,
-            selectedItem = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } },
-            onSelect = { onClassSelected(it.name) },
-            label = { it.name.displayName },
-            description = { "d${it.hitDie} hit die" },
-        )
+        AnimatedContent(
+            targetState = showCollapsed,
+            transitionSpec = {
+                (fadeIn() + slideInVertically())
+                    .togetherWith(fadeOut() + slideOutVertically())
+            },
+            label = "classGridCollapse",
+        ) { collapsed ->
+            if (collapsed && classDef != null) {
+                DndCard(
+                    selected = true,
+                    onClick = { userExpandedGrid = true },
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(weight = 1f)) {
+                            Text(
+                                text = classDef.name.displayName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = "d${classDef.hitDie} hit die",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        TextButton(onClick = { userExpandedGrid = true }) {
+                            Text(text = "Change")
+                        }
+                    }
+                }
+            } else {
+                SelectionGrid(
+                    items = ClassData.ALL_CLASSES,
+                    selectedItem = classDef,
+                    onSelect = {
+                        onClassSelected(it.name)
+                        userExpandedGrid = false
+                    },
+                    label = { it.name.displayName },
+                    description = { "d${it.hitDie} hit die" },
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(height = 16.dp))
 
@@ -68,7 +122,6 @@ fun ClassStep(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        val classDef = character.className?.let { name -> ClassData.ALL_CLASSES.find { it.name == name } }
         val subclassLevel = classDef?.subclassLevel ?: 3
         if (character.level >= subclassLevel && classDef != null) {
             val subclasses = classDef.subclasses
@@ -121,7 +174,7 @@ fun ClassStep(
 
 @PreviewLightDark
 @Composable
-private fun ClassStepPreview() {
+private fun ClassStepSelectedPreview() {
     SessionZeroTheme {
         ClassStep(character = PreviewData.sampleCharacter)
     }
