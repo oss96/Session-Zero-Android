@@ -38,6 +38,8 @@ class WizardViewModel @Inject constructor(
     private val _character = MutableStateFlow(Character.empty())
     val character: StateFlow<Character> = _character.asStateFlow()
 
+    private var _initialCharacter: Character = Character.empty()
+
     private val _currentStep = MutableStateFlow(0)
     val currentStep: StateFlow<Int> = _currentStep.asStateFlow()
 
@@ -51,6 +53,10 @@ class WizardViewModel @Inject constructor(
         .map { computeDerivedStats(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DerivedStats())
 
+    val hasUnsavedChanges: StateFlow<Boolean> = _character
+        .map { it != _initialCharacter }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun initialize(characterId: String?) {
         _currentStep.value = 0
         _saveComplete.value = false
@@ -60,11 +66,14 @@ class WizardViewModel @Inject constructor(
                 getCharacterUseCase(characterId).collect { loaded ->
                     if (loaded != null) {
                         _character.value = loaded
+                        _initialCharacter = loaded
                     }
                 }
             }
         } else {
-            _character.value = Character.empty()
+            val empty = Character.empty()
+            _character.value = empty
+            _initialCharacter = empty
         }
     }
 
