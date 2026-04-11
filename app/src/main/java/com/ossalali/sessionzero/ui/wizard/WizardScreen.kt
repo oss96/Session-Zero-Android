@@ -68,6 +68,7 @@ fun WizardScreen(
         currentStep = currentStep,
         derivedStats = derivedStats,
         onNavigateBack = onNavigateBack,
+        onStepClick = { viewModel.setStep(step = it) },
         onPrevious = { viewModel.previousStep() },
         onNext = { viewModel.nextStep() },
         stepContent = { page, pagerCharacter ->
@@ -97,6 +98,7 @@ fun WizardContent(
     currentStep: Int = 0,
     derivedStats: DerivedStats = DerivedStats(),
     onNavigateBack: () -> Unit = {},
+    onStepClick: (Int) -> Unit = {},
     onPrevious: () -> Unit = {},
     onNext: () -> Unit = {},
     stepContent: @Composable (page: Int, character: Character) -> Unit = { _, _ -> },
@@ -163,6 +165,10 @@ fun WizardContent(
             StepIndicator(
                 steps = WizardViewModel.STEP_LABELS,
                 currentStep = currentStep,
+                onStepClick = { step ->
+                    onStepClick(step)
+                    scope.launch { pagerState.animateScrollToPage(step) }
+                },
             )
 
             HorizontalPager(
