@@ -35,10 +35,12 @@ class WizardViewModel @Inject constructor(
     private val computeDerivedStats: ComputeDerivedStatsUseCase,
 ) : ViewModel() {
 
-    private val _character = MutableStateFlow(Character.empty())
+    private val _defaultCharacter = Character.empty()
+
+    private val _character = MutableStateFlow(_defaultCharacter)
     val character: StateFlow<Character> = _character.asStateFlow()
 
-    private var _initialCharacter: Character = Character.empty()
+    private var _initialCharacter: Character = _defaultCharacter
 
     private val _currentStep = MutableStateFlow(0)
     val currentStep: StateFlow<Int> = _currentStep.asStateFlow()
@@ -65,8 +67,8 @@ class WizardViewModel @Inject constructor(
             viewModelScope.launch {
                 getCharacterUseCase(characterId).collect { loaded ->
                     if (loaded != null) {
-                        _character.value = loaded
                         _initialCharacter = loaded
+                        _character.value = loaded
                     }
                 }
             }
