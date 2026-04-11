@@ -10,7 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun <T> SelectionGrid(
@@ -59,5 +61,21 @@ fun <T> SelectionGrid(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SelectionGridPreview() {
+    val items = listOf("Fighter", "Wizard", "Rogue", "Cleric", "Ranger")
+    SessionZeroTheme(dynamicColor = false) {
+        SelectionGrid(
+            items = items,
+            selectedItem = "Wizard",
+            onSelect = {},
+            label = { it },
+            description = { "A $it class" },
+            modifier = Modifier.padding(16.dp),
+        )
     }
 }

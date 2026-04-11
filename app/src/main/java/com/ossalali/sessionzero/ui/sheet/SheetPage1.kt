@@ -12,10 +12,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 import com.ossalali.sessionzero.domain.model.AbilityName
 import com.ossalali.sessionzero.domain.model.AbilityScores
 import com.ossalali.sessionzero.domain.model.Character
@@ -157,6 +162,40 @@ private fun CombatStatCard(label: String, value: String) {
         ) {
             Text(label, style = MaterialTheme.typography.labelSmall)
             Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SheetPage1Preview() {
+    SessionZeroTheme(dynamicColor = false) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            SheetPage1(
+                character = PreviewData.sampleCharacter,
+                derivedStats = PreviewData.sampleDerivedStats,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Sheet Page 1 - Caster")
+@Composable
+private fun SheetPage1CasterPreview() {
+    SessionZeroTheme(dynamicColor = false) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            SheetPage1(
+                character = PreviewData.sampleCasterCharacter,
+                derivedStats = PreviewData.sampleCasterDerivedStats,
+            )
         }
     }
 }

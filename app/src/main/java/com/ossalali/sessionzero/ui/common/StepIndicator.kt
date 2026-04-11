@@ -16,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
 fun StepIndicator(
@@ -68,5 +70,16 @@ fun StepIndicator(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StepIndicatorPreview() {
+    SessionZeroTheme(dynamicColor = false) {
+        StepIndicator(
+            steps = listOf("Class", "Species", "Background", "Abilities", "Skills", "Equipment", "Details", "Review"),
+            currentStep = 3,
+        )
     }
 }
