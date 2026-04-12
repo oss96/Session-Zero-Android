@@ -92,8 +92,7 @@ fun CharacterSheetContent(
                     .verticalScroll(state = rememberScrollState())
                     .padding(all = 16.dp),
             ) {
-                SheetPage1(character = char, derivedStats = derivedStats)
-                SheetPage2(character = char, derivedStats = derivedStats)
+                SheetBody(character = char, derivedStats = derivedStats)
             }
         }
     }

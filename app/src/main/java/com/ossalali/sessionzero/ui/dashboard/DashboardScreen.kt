@@ -43,9 +43,9 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
-    onCreateCharacter: () -> Unit,
-    onEditCharacter: (String) -> Unit,
-    onViewSheet: (String) -> Unit,
+    onCreateCharacter: () -> Unit = {},
+    onEditCharacter: (String) -> Unit = {},
+    onViewSheet: (String) -> Unit = {},
 ) {
     val characters by viewModel.characters.collectAsState()
     val importError by viewModel.importError.collectAsState()
