@@ -25,7 +25,7 @@ fun HeaderSection(character: Character) {
         )
         val subtitle = buildList {
             character.className?.let { add("Level ${character.level} ${it.displayName}") }
-            character.subclass?.let { add(it) }
+            character.subclass?.takeIf { it.isNotEmpty() }?.let { add(it) }
             character.species?.let { add(it.displayName) }
             character.background?.let { add(it.displayName) }
         }.joinToString(separator = " | ")

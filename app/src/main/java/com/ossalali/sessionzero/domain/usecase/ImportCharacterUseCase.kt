@@ -26,7 +26,11 @@ class ImportCharacterUseCase @Inject constructor() {
     operator fun invoke(jsonString: String): Result<Character> = runCatching {
         val obj = json.parseToJsonElement(jsonString).jsonObject
 
-        fun str(key: String) = obj[key]?.jsonPrimitive?.content ?: ""
+        fun str(key: String): String {
+            val element = obj[key] ?: return ""
+            if (element is kotlinx.serialization.json.JsonNull) return ""
+            return element.jsonPrimitive.content
+        }
         fun intVal(key: String, default: Int = 0) = obj[key]?.jsonPrimitive?.intOrNull ?: default
 
         // Ability scores: support both flat fields (baseStr) and nested object (baseAbilityScores)
