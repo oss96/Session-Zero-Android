@@ -289,10 +289,10 @@ class WizardViewModel @Inject constructor(
     }
 
     companion object {
-        const val STEP_COUNT = 8
+        const val STEP_COUNT = 9
         val STEP_LABELS = listOf(
             "Class", "Species", "Background", "Abilities",
-            "Skills", "Equipment", "Details", "Review"
+            "Skills", "Equipment", "Weapons", "Details", "Review"
         )
     }
 }

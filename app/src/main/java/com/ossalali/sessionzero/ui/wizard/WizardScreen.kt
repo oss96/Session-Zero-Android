@@ -46,6 +46,7 @@ import com.ossalali.sessionzero.ui.wizard.steps.EquipmentStep
 import com.ossalali.sessionzero.ui.wizard.steps.ReviewStep
 import com.ossalali.sessionzero.ui.wizard.steps.SkillsStep
 import com.ossalali.sessionzero.ui.wizard.steps.SpeciesStep
+import com.ossalali.sessionzero.ui.wizard.steps.WeaponStep
 import kotlinx.coroutines.launch
 
 @Composable
@@ -115,7 +116,11 @@ fun WizardScreen(
                     onAddEquipmentItem = { viewModel.addEquipmentItem(item = it) },
                     onRemoveEquipmentItem = { viewModel.removeEquipmentItem(index = it) },
                 )
-                6 -> DetailsStep(
+                6 -> WeaponStep(
+                    character = pagerCharacter,
+                    onWeaponsChanged = { viewModel.setWeapons(weapons = it) },
+                )
+                7 -> DetailsStep(
                     character = pagerCharacter,
                     onNameChanged = { viewModel.setName(name = it) },
                     onPronounsChanged = { viewModel.setPronouns(pronouns = it) },
@@ -129,7 +134,7 @@ fun WizardScreen(
                     onAlliesChanged = { viewModel.setAlliesAndOrganizations(value = it) },
                     onNotesChanged = { viewModel.setAdditionalNotes(value = it) },
                 )
-                7 -> ReviewStep(
+                8 -> ReviewStep(
                     character = pagerCharacter,
                     derivedStats = derivedStats,
                 )
@@ -303,7 +308,7 @@ private fun WizardScreenLastStepPreview() {
         WizardContent(
             title = "Create Character",
             character = PreviewData.sampleCharacter,
-            currentStep = 7,
+            currentStep = 8,
         )
     }
 }

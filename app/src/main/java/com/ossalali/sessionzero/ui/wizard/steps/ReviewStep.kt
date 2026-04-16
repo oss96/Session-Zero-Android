@@ -25,6 +25,7 @@ import com.ossalali.sessionzero.domain.rules.GameRules
 import com.ossalali.sessionzero.ui.common.AbilityScoreBox
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.preview.PreviewData
+import com.ossalali.sessionzero.ui.sheet.sections.CombatSection
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 @Composable
@@ -69,14 +70,8 @@ fun ReviewStep(
         }
 
         Spacer(modifier = Modifier.height(height = 16.dp))
-        SectionHeader(text = "Combat Stats")
+        CombatSection(derivedStats = derivedStats)
 
-        ReviewRow(label = "Max HP", value = "${derivedStats.maxHP}")
-        ReviewRow(label = "AC", value = "${derivedStats.armorClass}")
-        ReviewRow(label = "Initiative", value = "+${derivedStats.initiative}")
-        ReviewRow(label = "Speed", value = "${derivedStats.speed}ft")
-        ReviewRow(label = "Hit Dice", value = derivedStats.hitDice)
-        ReviewRow(label = "Proficiency Bonus", value = "+${derivedStats.proficiencyBonus}")
         derivedStats.spellSaveDC?.let { ReviewRow(label = "Spell Save DC", value = "$it") }
         derivedStats.spellAttackBonus?.let { ReviewRow(label = "Spell Attack", value = "+$it") }
 
@@ -91,6 +86,14 @@ fun ReviewStep(
             SectionHeader(text = "Equipment")
             character.equipment.forEach { item ->
                 Text(text = "- ${item.name}${if (item.quantity > 1) " x${item.quantity}" else ""}")
+            }
+        }
+
+        if (character.weapons.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(height = 16.dp))
+            SectionHeader(text = "Weapons")
+            character.weapons.forEach { weapon ->
+                Text(text = "- ${weapon.name}: ${weapon.damage}")
             }
         }
 
