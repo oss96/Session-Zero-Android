@@ -24,6 +24,7 @@ fun AbilityScoresSection(character: Character) {
     SectionHeader(text = "Ability Scores")
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
+        maxItemsInEachRow = 3,
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         val scores = character.totalAbilityScores

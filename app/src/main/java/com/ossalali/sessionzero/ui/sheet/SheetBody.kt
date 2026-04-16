@@ -195,7 +195,25 @@ private fun SheetBodyCasterScrolled2Preview() {
     SessionZeroTheme {
         Column(
             modifier = Modifier
-                .verticalScroll(state = rememberScrollState())
+                .verticalScroll(state = rememberScrollState(initial = 2200))
+                .padding(all = 16.dp),
+        ) {
+            SheetBody(
+                character = PreviewData.sampleCasterCharacter,
+                derivedStats = PreviewData.sampleCasterDerivedStats,
+            )
+        }
+    }
+}
+
+
+@PreviewLightDark
+@Composable
+private fun SheetBodyCasterScrolledMaxPreview() {
+    SessionZeroTheme {
+        Column(
+            modifier = Modifier
+                .verticalScroll(state = rememberScrollState(initial = 4400))
                 .padding(all = 16.dp),
         ) {
             SheetBody(
