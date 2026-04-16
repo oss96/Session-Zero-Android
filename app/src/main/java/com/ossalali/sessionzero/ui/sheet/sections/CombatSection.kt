@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.DerivedStats
 import com.ossalali.sessionzero.ui.common.CircleStat
-import com.ossalali.sessionzero.ui.common.HeartStat
+import com.ossalali.sessionzero.ui.common.DiamondStat
 import com.ossalali.sessionzero.ui.common.HexagonShape
 import com.ossalali.sessionzero.ui.common.HexagonStat
 import com.ossalali.sessionzero.ui.common.RectangleStat
@@ -44,7 +44,8 @@ fun CombatSection(derivedStats: DerivedStats) {
                 label = "AC",
                 value = "${derivedStats.armorClass}",
             )
-            HeartStat(label = "HP", value = "${derivedStats.maxHP}")
+            DiamondStat(label = "HP", value = "${derivedStats.maxHP}")
+            //HeartStat(label = "HP", value = "${derivedStats.maxHP}")
         }
 
         Spacer(modifier = Modifier.height(height = 8.dp))
@@ -123,6 +124,7 @@ private fun CombatSectionPreview() {
     SessionZeroTheme {
         Column(
             modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.background)
                 .verticalScroll(state = rememberScrollState())
                 .padding(all = 16.dp),
         ) {

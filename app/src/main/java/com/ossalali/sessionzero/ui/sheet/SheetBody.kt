@@ -1,6 +1,8 @@
 package com.ossalali.sessionzero.ui.sheet
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -49,11 +51,13 @@ fun SheetBody(
 
     Spacer(modifier = Modifier.height(height = 16.dp))
 
-    SavingThrowsSection(derivedStats = derivedStats, classDef = classDef)
-
-    Spacer(modifier = Modifier.height(height = 16.dp))
-
-    SkillsSection(character = character, derivedStats = derivedStats)
+    Row(
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        SkillsSection(character = character, derivedStats = derivedStats)
+        Spacer(modifier = Modifier.weight(1f))
+        SavingThrowsSection(derivedStats = derivedStats, classDef = classDef)
+    }
 
     Spacer(modifier = Modifier.height(height = 16.dp))
 
@@ -154,6 +158,40 @@ private fun SheetBodyPreview() {
 @PreviewLightDark
 @Composable
 private fun SheetBodyCasterPreview() {
+    SessionZeroTheme {
+        Column(
+            modifier = Modifier
+                .verticalScroll(state = rememberScrollState())
+                .padding(all = 16.dp),
+        ) {
+            SheetBody(
+                character = PreviewData.sampleCasterCharacter,
+                derivedStats = PreviewData.sampleCasterDerivedStats,
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SheetBodyScrolledPreview() {
+    SessionZeroTheme {
+        Column(
+            modifier = Modifier
+                .verticalScroll(state = rememberScrollState(initial = 2200))
+                .padding(all = 16.dp),
+        ) {
+            SheetBody(
+                character = PreviewData.sampleCharacter,
+                derivedStats = PreviewData.sampleDerivedStats,
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SheetBodyCasterScrolled2Preview() {
     SessionZeroTheme {
         Column(
             modifier = Modifier

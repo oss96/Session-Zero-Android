@@ -7,12 +7,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.AbilityName
 import com.ossalali.sessionzero.domain.model.AbilityScores
-import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.ClassDefinition
 import com.ossalali.sessionzero.domain.model.DerivedStats
 import com.ossalali.sessionzero.ui.common.SectionHeader
@@ -24,15 +24,17 @@ fun SavingThrowsSection(
     derivedStats: DerivedStats,
     classDef: ClassDefinition?,
 ) {
-    SectionHeader(text = "Saving Throws")
-    AbilityName.entries.forEach { ability ->
-        val bonus = derivedStats.savingThrows[ability] ?: 0
-        val isProficient = classDef?.savingThrows?.contains(ability) == true
-        val sign = if (bonus >= 0) "+" else ""
-        Text(
-            text = "${if (isProficient) "●" else "○"} ${AbilityScores.ABILITY_LABELS[ability]}: $sign$bonus",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+    Column(horizontalAlignment = Alignment.Start) {
+        SectionHeader(text = "Saving Throws")
+        AbilityName.entries.forEach { ability ->
+            val bonus = derivedStats.savingThrows[ability] ?: 0
+            val isProficient = classDef?.savingThrows?.contains(ability) == true
+            val sign = if (bonus >= 0) "+" else ""
+            Text(
+                text = "${if (isProficient) "●" else "○"} ${AbilityScores.ABILITY_LABELS[ability]}: $sign$bonus",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 

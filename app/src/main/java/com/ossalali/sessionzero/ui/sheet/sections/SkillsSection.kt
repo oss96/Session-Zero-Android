@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -22,15 +23,17 @@ fun SkillsSection(
     character: Character,
     derivedStats: DerivedStats,
 ) {
-    SectionHeader(text = "Skills")
-    SkillName.entries.forEach { skill ->
-        val bonus = derivedStats.skillBonuses[skill] ?: 0
-        val isProficient = skill in character.skillProficiencies
-        val sign = if (bonus >= 0) "+" else ""
-        Text(
-            text = "${if (isProficient) "●" else "○"} ${skill.displayName}: $sign$bonus",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+    Column(horizontalAlignment = Alignment.Start) {
+        SectionHeader(text = "Skills")
+        SkillName.entries.forEach { skill ->
+            val bonus = derivedStats.skillBonuses[skill] ?: 0
+            val isProficient = skill in character.skillProficiencies
+            val sign = if (bonus >= 0) "+" else ""
+            Text(
+                text = "${if (isProficient) "●" else "○"} ${skill.displayName}: $sign$bonus",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
