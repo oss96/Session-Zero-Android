@@ -45,16 +45,20 @@ fun CombatSection(derivedStats: DerivedStats) {
                 value = "${derivedStats.armorClass}",
             )
             DiamondStat(label = "HP", value = "${derivedStats.maxHP}")
-            //HeartStat(label = "HP", value = "${derivedStats.maxHP}")
         }
 
+        Spacer(modifier = Modifier.height(height = 8.dp))
+        RectangleStat(
+            modifier = Modifier.size(width = 100.dp, height = 48.dp),
+            label = "Init",
+            value = "+${derivedStats.initiative}"
+        )
         Spacer(modifier = Modifier.height(height = 8.dp))
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            RectangleStat(label = "Init", value = "+${derivedStats.initiative}")
             RectangleStat(label = "Speed", value = "${derivedStats.speed}ft")
             HexagonStat(label = "Hit Dice", value = derivedStats.hitDice)
             CircleStat(label = "Prof", value = "+${derivedStats.proficiencyBonus}")

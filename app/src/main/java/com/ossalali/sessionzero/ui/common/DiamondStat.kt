@@ -26,14 +26,13 @@ fun DiamondStat(
     value: String,
 ) {
     Box(
-        modifier = modifier
-            .size(size = 80.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             modifier = Modifier
-                .rotate(degrees = 45f)
-                .size(size = 80.dp),
+                .size(size = 80.dp)
+                .rotate(degrees = 45f),
             painter = painterResource(R.drawable.square_24px),
             contentDescription = "HP",
             tint = MaterialTheme.colorScheme.error
@@ -43,8 +42,7 @@ fun DiamondStat(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start,
                 color = MaterialTheme.colorScheme.onError,
             )
