@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.ClassDefinition
+import com.ossalali.sessionzero.domain.model.ClassFeature
 import com.ossalali.sessionzero.domain.rules.ClassData
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.preview.PreviewData
@@ -23,12 +24,33 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 fun FeaturesSection(
     classDef: ClassDefinition,
     level: Int,
+    subclassName: String? = null,
 ) {
-    val features = classDef.features.filter { it.key <= level }.flatMap { it.value }
-    if (features.isEmpty()) return
+    val subclassDef = subclassName?.let { name ->
+        classDef.subclasses.find { it.name == name }
+    }
+
+    val classFeatures = classDef.features
+        .filter { it.key <= level }
+        .flatMap { it.value }
+
+    val subclassFeatures = subclassDef?.let { sub ->
+        val entry = ClassFeature(
+            name = sub.name,
+            description = sub.description,
+            level = classDef.subclassLevel,
+        )
+        val levelFeatures = sub.features
+            .filter { it.key <= level }
+            .flatMap { it.value }
+        listOf(entry) + levelFeatures
+    }.orEmpty()
+
+    val allFeatures = classFeatures + subclassFeatures
+    if (allFeatures.isEmpty()) return
 
     SectionHeader(text = "Features & Traits")
-    features.forEach { feature ->
+    allFeatures.forEach { feature ->
         Text(
             text = feature.name,
             style = MaterialTheme.typography.titleSmall,
@@ -54,6 +76,7 @@ private fun FeaturesSectionPreview() {
             FeaturesSection(
                 classDef = classDef,
                 level = PreviewData.sampleCharacter.level,
+                subclassName = PreviewData.sampleCharacter.subclass,
             )
         }
     }

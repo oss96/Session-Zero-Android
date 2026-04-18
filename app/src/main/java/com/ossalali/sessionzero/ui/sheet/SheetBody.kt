@@ -100,7 +100,11 @@ fun SheetBody(
     }
 
     if (classDef != null) {
-        FeaturesSection(classDef = classDef, level = character.level)
+        FeaturesSection(
+            classDef = classDef,
+            level = character.level,
+            subclassName = character.subclass,
+        )
         Spacer(modifier = Modifier.height(height = 16.dp))
     }
 
