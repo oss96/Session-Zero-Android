@@ -58,8 +58,10 @@ object PreviewData {
         flaws = "I have little respect for anyone who is not a proven warrior.",
         appearance = Appearance(
             age = "85",
-            height = "4'6\"",
-            weight = "180 lbs",
+            height = "137",
+            heightUnit = "m",
+            weight = "82",
+            weightUnit = "kg",
             eyes = "Amber",
             skin = "Tan",
             hair = "Black, braided",

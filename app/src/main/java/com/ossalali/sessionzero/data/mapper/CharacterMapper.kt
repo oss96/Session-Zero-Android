@@ -195,18 +195,40 @@ object CharacterMapper {
     private data class AppearanceJson(
         val age: String = "",
         val height: String = "",
+        val heightUnit: String = "",
         val weight: String = "",
+        val weightUnit: String = "",
         val eyes: String = "",
         val skin: String = "",
         val hair: String = "",
         val distinguishingMarks: String = "",
         val description: String = "",
     ) {
-        fun toAppearance() = Appearance(age, height, weight, eyes, skin, hair, distinguishingMarks, description)
+        fun toAppearance() = Appearance(
+            age = age,
+            height = height,
+            heightUnit = heightUnit.ifEmpty { "m" },
+            weight = weight,
+            weightUnit = weightUnit.ifEmpty { "kg" },
+            eyes = eyes,
+            skin = skin,
+            hair = hair,
+            distinguishingMarks = distinguishingMarks,
+            description = description,
+        )
 
         companion object {
             fun from(a: Appearance) = AppearanceJson(
-                a.age, a.height, a.weight, a.eyes, a.skin, a.hair, a.distinguishingMarks, a.description
+                age = a.age,
+                height = a.height,
+                heightUnit = a.heightUnit,
+                weight = a.weight,
+                weightUnit = a.weightUnit,
+                eyes = a.eyes,
+                skin = a.skin,
+                hair = a.hair,
+                distinguishingMarks = a.distinguishingMarks,
+                description = a.description,
             )
         }
     }

@@ -18,8 +18,8 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 fun AppearanceSection(appearance: Appearance) {
     SectionHeader(text = "Appearance")
     if (appearance.age.isNotEmpty()) Text(text = "Age: ${appearance.age}")
-    if (appearance.height.isNotEmpty()) Text(text = "Height: ${appearance.height}")
-    if (appearance.weight.isNotEmpty()) Text(text = "Weight: ${appearance.weight}")
+    if (appearance.height.isNotEmpty()) Text(text = "Height: ${appearance.height} ${appearance.heightUnit}")
+    if (appearance.weight.isNotEmpty()) Text(text = "Weight: ${appearance.weight} ${appearance.weightUnit}")
     if (appearance.eyes.isNotEmpty()) Text(text = "Eyes: ${appearance.eyes}")
     if (appearance.skin.isNotEmpty()) Text(text = "Skin: ${appearance.skin}")
     if (appearance.hair.isNotEmpty()) Text(text = "Hair: ${appearance.hair}")
