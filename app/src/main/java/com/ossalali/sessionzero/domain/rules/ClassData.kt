@@ -10,7 +10,18 @@ import com.ossalali.sessionzero.domain.model.EquipmentPackage
 import com.ossalali.sessionzero.domain.model.SkillName
 import com.ossalali.sessionzero.domain.model.SpellcastingProfile
 import com.ossalali.sessionzero.domain.model.SpellcastingType
-import com.ossalali.sessionzero.domain.model.SubclassDefinition
+import com.ossalali.sessionzero.domain.rules.subclasses.BarbarianSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.BardSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.ClericSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.DruidSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.FighterSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.MonkSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.PaladinSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.RangerSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.RogueSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.SorcererSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.WarlockSubclasses
+import com.ossalali.sessionzero.domain.rules.subclasses.WizardSubclasses
 
 object ClassData {
 
@@ -45,12 +56,7 @@ object ClassData {
                     ClassFeature("Primal Knowledge", "You gain proficiency in one skill from the Barbarian skill list.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Berserker", "Channels rage into a violent frenzy, gaining extra attacks and immunity to charm and fear while raging."),
-                SubclassDefinition("Wild Heart", "Draws power from the animal spirits of nature, gaining a Beast Companion feature and nature-themed rage abilities."),
-                SubclassDefinition("World Tree", "Taps into the magic of the World Tree to teleport allies and create protective barriers while raging."),
-                SubclassDefinition("Zealot", "Fueled by divine fury, deals extra radiant or necrotic damage and can be resurrected without material components."),
-            ),
+            subclasses = BarbarianSubclasses.ALL,
             subclassLevel = 3,
             equipmentPackages = listOf(
                 EquipmentPackage(
@@ -96,12 +102,7 @@ object ClassData {
                     ClassFeature("Bard Subclass", "You gain a Bard subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Dance", "Uses graceful movement to bolster allies and confound enemies, gaining benefits while moving on the battlefield."),
-                SubclassDefinition("Glamour", "Weaves fey magic into performances that charm and enthrall audiences, granting temporary hit points and commanding movement."),
-                SubclassDefinition("Lore", "Pursues knowledge from every source, gaining additional skill proficiencies and the ability to use Bardic Inspiration to debuff enemies."),
-                SubclassDefinition("Valor", "Inspires bravery on the battlefield, gaining medium armor and shield proficiency and granting allies combat benefits with Bardic Inspiration."),
-            ),
+            subclasses = BardSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.CHA,
@@ -154,12 +155,7 @@ object ClassData {
                     ClassFeature("Cleric Subclass", "You gain a Cleric subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Life", "Focuses on healing magic, granting bonus healing to restoration spells and eventually heavy armor proficiency."),
-                SubclassDefinition("Light", "Harnesses radiant energy and fire to burn away darkness, gaining potent offensive spells and a protective Warding Flare."),
-                SubclassDefinition("Trickery", "Uses illusion and deception in service of their deity, gaining stealth-related abilities and a duplicitous blessing."),
-                SubclassDefinition("War", "Inspires allies on the battlefield, granting bonus attacks through divine power and eventually heavy armor and martial weapon proficiency."),
-            ),
+            subclasses = ClericSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.WIS,
@@ -218,12 +214,7 @@ object ClassData {
                     ClassFeature("Druid Subclass", "You gain a Druid subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Land", "Draws on the magic of the environment, gaining bonus spells based on a chosen terrain and recovering spell slots during short rests."),
-                SubclassDefinition("Moon", "Specializes in Wild Shape combat, gaining improved beast forms with more hit points and the ability to transform into more powerful creatures."),
-                SubclassDefinition("Sea", "Channels the power of the ocean, gaining aquatic Wild Shape forms and water-themed magical abilities."),
-                SubclassDefinition("Stars", "Draws on the power of starlight, gaining a starry form that can heal allies, attack with radiant bolts, or maintain concentration more easily."),
-            ),
+            subclasses = DruidSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.WIS,
@@ -282,12 +273,7 @@ object ClassData {
                     ClassFeature("Fighter Subclass", "You gain a Fighter subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Battle Master", "Employs martial techniques called maneuvers, gaining superiority dice to fuel special combat moves like Riposte, Trip Attack, and Disarming Attack."),
-                SubclassDefinition("Champion", "Focuses on raw physical power and athletic prowess, improving critical hit range and gaining remarkable athleticism."),
-                SubclassDefinition("Eldritch Knight", "Combines martial prowess with arcane magic, gaining access to Wizard spells with a focus on Abjuration and Evocation."),
-                SubclassDefinition("Psi Warrior", "Awakens psionic power within, using telekinetic force to protect allies and strike enemies with psychic blades."),
-            ),
+            subclasses = FighterSubclasses.ALL,
             subclassLevel = 3,
             equipmentPackages = listOf(
                 EquipmentPackage(
@@ -339,12 +325,7 @@ object ClassData {
                     ClassFeature("Deflect Attacks", "You can use your Reaction to deflect melee and ranged attacks, reducing the damage taken. If damage is reduced to 0, you can spend a Focus Point to redirect the attack.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Elements", "Channels ki into elemental magic, gaining the ability to cast elemental spells and infuse attacks with elemental energy."),
-                SubclassDefinition("Mercy", "Manipulates the life force of others, gaining the ability to heal allies with a touch or inflict debilitating conditions on enemies."),
-                SubclassDefinition("Open Hand", "Masters the art of unarmed combat, gaining enhanced Flurry of Blows that can knock enemies prone, push them, or prevent reactions."),
-                SubclassDefinition("Shadow", "Harnesses the power of darkness, gaining the ability to teleport between shadows and cast darkness-related spells."),
-            ),
+            subclasses = MonkSubclasses.ALL,
             subclassLevel = 3,
             equipmentPackages = listOf(
                 EquipmentPackage(
@@ -392,12 +373,7 @@ object ClassData {
                     ClassFeature("Paladin Subclass", "You gain a Paladin subclass of your choice, representing your Sacred Oath.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Devotion", "Upholds the ideals of justice, virtue, and order, gaining powers to protect the innocent and smite the wicked with holy light."),
-                SubclassDefinition("Glory", "Trains relentlessly to hone body and spirit, inspiring allies to feats of valor and gaining supernatural athleticism."),
-                SubclassDefinition("Ancients", "Swears an oath to protect the light of the world, gaining nature-themed spells and the ability to restrain foes with ensnaring vines."),
-                SubclassDefinition("Vengeance", "Devotes themselves to punishing wrongdoers, gaining abilities to pursue and strike down enemies of justice without mercy."),
-            ),
+            subclasses = PaladinSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.CHA,
@@ -454,12 +430,7 @@ object ClassData {
                     ClassFeature("Ranger Subclass", "You gain a Ranger subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Beast Master", "Forges a mystical bond with a beast companion that fights alongside you, gaining commands to direct it in battle."),
-                SubclassDefinition("Fey Wanderer", "Draws on fey magic to beguile enemies, gaining psychic damage on attacks and the ability to add WIS to CHA checks."),
-                SubclassDefinition("Gloom Stalker", "Ambushes foes in darkness, gaining bonus damage on first-round attacks, darkvision, and invisibility to creatures relying on darkvision."),
-                SubclassDefinition("Hunter", "Trains to take on the most dangerous threats, gaining abilities to deal extra damage or defend against multiple attackers."),
-            ),
+            subclasses = RangerSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.WIS,
@@ -520,12 +491,7 @@ object ClassData {
                     ClassFeature("Steady Aim", "As a Bonus Action, you give yourself advantage on your next attack roll on the current turn if you haven't moved during this turn. Your speed becomes 0 until the end of the turn.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Arcane Trickster", "Augments stealth and agility with spellcasting, gaining Wizard spells focused on Enchantment and Illusion to enhance trickery."),
-                SubclassDefinition("Assassin", "Masters the art of death, gaining bonus damage against surprised creatures and proficiency with the Disguise Kit and Poisoner's Kit."),
-                SubclassDefinition("Soulknife", "Manifests psionic blades of psychic energy, gaining telepathic communication and enhanced skill checks with Psionic Energy dice."),
-                SubclassDefinition("Thief", "Hones the arts of burglary and treasure hunting, gaining the ability to use objects as a Bonus Action and climb unusually fast."),
-            ),
+            subclasses = RogueSubclasses.ALL,
             subclassLevel = 3,
             equipmentPackages = listOf(
                 EquipmentPackage(
@@ -577,12 +543,7 @@ object ClassData {
                     ClassFeature("Sorcerer Subclass", "You gain a Sorcerer subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Aberrant", "Draws on psionic power from an alien influence, gaining telepathic abilities and access to mind-themed spells."),
-                SubclassDefinition("Clockwork", "Channels the orderly magic of Mechanus, gaining the ability to negate advantage/disadvantage and access to order-themed spells."),
-                SubclassDefinition("Draconic", "Possesses innate magic from draconic ancestry, gaining bonus HP, natural armor, and eventually elemental damage resistance."),
-                SubclassDefinition("Wild Magic", "Innate magic stems from chaos, causing unpredictable magical surges that can produce a variety of random effects."),
-            ),
+            subclasses = SorcererSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.CHA,
@@ -637,12 +598,7 @@ object ClassData {
                     ClassFeature("Pact Boon", "Your patron grants you a special gift: Pact of the Blade (a magical weapon), Pact of the Chain (an improved familiar), Pact of the Tome (a Book of Shadows with extra cantrips).", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Archfey", "Your patron is a lord or lady of the fey, granting you the power to charm and frighten foes with fey magic."),
-                SubclassDefinition("Celestial", "Your patron is a powerful being of the Upper Planes, granting you healing abilities and radiant/fire damage bonuses."),
-                SubclassDefinition("Fiend", "Your patron is a fiend from the Lower Planes, granting you temporary hit points when you reduce a hostile creature to 0 HP."),
-                SubclassDefinition("Great Old One", "Your patron is a mysterious entity from beyond the stars, granting you telepathy and the ability to impose psychic effects on enemies."),
-            ),
+            subclasses = WarlockSubclasses.ALL,
             subclassLevel = 1,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.CHA,
@@ -703,12 +659,7 @@ object ClassData {
                     ClassFeature("Wizard Subclass", "You gain a Wizard subclass of your choice.", 3),
                 ),
             ),
-            subclasses = listOf(
-                SubclassDefinition("Abjuration", "Specializes in protective magic, gaining the ability to create magical wards that absorb damage for you and your allies."),
-                SubclassDefinition("Divination", "Masters the art of seeing the future, gaining Portent dice that can replace any attack roll, saving throw, or ability check."),
-                SubclassDefinition("Evocation", "Focuses on powerful offensive magic, gaining the ability to shape area spells around allies and maximize damage rolls."),
-                SubclassDefinition("Illusion", "Specializes in creating convincing illusions, gaining the ability to change illusions after casting and eventually make them partially real."),
-            ),
+            subclasses = WizardSubclasses.ALL,
             subclassLevel = 3,
             spellcasting = SpellcastingProfile(
                 ability = AbilityName.INT,

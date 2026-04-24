@@ -66,8 +66,11 @@ class ComputeDerivedStatsUseCase @Inject constructor() {
             skillBonuses[SkillName.INSIGHT] ?: 0
         )
 
-        // Spellcasting
-        val spellcasting = classDef?.spellcasting
+        // Spellcasting (class-level or subclass-level)
+        val subclassDef = character.subclass?.let { name ->
+            classDef?.subclasses?.find { it.name == name }
+        }
+        val spellcasting = classDef?.spellcasting ?: subclassDef?.spellcasting
         val spellSaveDC = if (spellcasting != null) {
             character.spellSaveDCOverride
                 ?: (8 + profBonus + (abilityMods[spellcasting.ability] ?: 0))

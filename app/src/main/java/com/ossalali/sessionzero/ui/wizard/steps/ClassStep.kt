@@ -167,6 +167,36 @@ fun ClassStep(
                         }
                     }
                 }
+
+                val selectedSub = character.subclass?.let { name ->
+                    subclasses.find { it.name == name }
+                }
+                if (selectedSub != null) {
+                    val featuresAtLevel = selectedSub.features
+                        .filter { it.key <= character.level }
+                        .flatMap { it.value }
+                    if (featuresAtLevel.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(height = 12.dp))
+                        Text(
+                            text = "Subclass Features",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(modifier = Modifier.height(height = 4.dp))
+                        featuresAtLevel.forEach { feature ->
+                            Text(
+                                text = feature.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = feature.description,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Spacer(modifier = Modifier.height(height = 4.dp))
+                        }
+                    }
+                }
             }
         }
     }

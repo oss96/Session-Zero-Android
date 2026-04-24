@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
-import com.ossalali.sessionzero.domain.model.ClassDefinition
 import com.ossalali.sessionzero.domain.model.DerivedStats
+import com.ossalali.sessionzero.domain.model.SpellcastingProfile
 import com.ossalali.sessionzero.domain.rules.ClassData
 import com.ossalali.sessionzero.domain.rules.SpellSlotTables
 import com.ossalali.sessionzero.ui.common.SectionHeader
@@ -25,9 +25,8 @@ import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 fun SpellcastingSection(
     character: Character,
     derivedStats: DerivedStats,
-    classDef: ClassDefinition,
+    spellcasting: SpellcastingProfile,
 ) {
-    val spellcasting = classDef.spellcasting ?: return
 
     SectionHeader(text = "Spellcasting")
     derivedStats.spellSaveDC?.let {
@@ -75,7 +74,7 @@ private fun SpellcastingSectionPreview() {
             SpellcastingSection(
                 character = character,
                 derivedStats = PreviewData.sampleCasterDerivedStats,
-                classDef = classDef,
+                spellcasting = classDef.spellcasting!!,
             )
         }
     }

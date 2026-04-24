@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.domain.model.DerivedStats
+import com.ossalali.sessionzero.domain.model.SpellcastingProfile
 import com.ossalali.sessionzero.domain.rules.ClassData
 import com.ossalali.sessionzero.ui.common.SectionHeader
 import com.ossalali.sessionzero.ui.preview.PreviewData
@@ -90,11 +91,15 @@ fun SheetBody(
     EquipmentSection(character = character)
     Spacer(modifier = Modifier.height(height = 16.dp))
 
-    if (classDef?.spellcasting != null) {
+    val subclassDef = character.subclass?.let { name ->
+        classDef?.subclasses?.find { it.name == name }
+    }
+    val effectiveSpellcasting = classDef?.spellcasting ?: subclassDef?.spellcasting
+    if (effectiveSpellcasting != null) {
         SpellcastingSection(
             character = character,
             derivedStats = derivedStats,
-            classDef = classDef,
+            spellcasting = effectiveSpellcasting,
         )
         Spacer(modifier = Modifier.height(height = 16.dp))
     }
