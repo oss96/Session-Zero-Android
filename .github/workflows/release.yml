@@ -64,6 +64,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.new_version }}
-          name: Session Zero v${{ steps.bump.outputs.new_version }}
+          name: Session Zero
           generate_release_notes: true
           files: app/build/outputs/apk/release/*.apk
