@@ -49,6 +49,84 @@ It is a port of the web app at `dnd-builder`, featuring:
 
 Full catalog in `gradle/libs.versions.toml`.
 
+## Release Process
+
+### Triggering a Release
+
+Releases are produced by the **Release** GitHub Actions workflow
+(`.github/workflows/release.yml`). Trigger it from the Actions tab on
+github.com (Run workflow button) or via the GitHub CLI:
+
+```bash
+gh workflow run Release --ref main
+gh run watch                # optional: follow the run live
+```
+
+The workflow runs end-to-end on GitHub's runners and:
+
+1. Reads `version.properties`, bumps `MINOR` by 1, commits the change to `main`
+2. Creates an annotated tag `vMAJOR.MINOR.0` and pushes both the commit and tag
+3. Decodes the keystore from the `KEYSTORE_BASE64` secret onto the runner
+4. Builds the signed `app-release.apk` via `./gradlew assembleRelease`
+5. Publishes a GitHub Release titled **Session Zero** with the APK attached and
+   auto-generated release notes (commits since the previous tag)
+
+A failed run after step 2 will leave a bump commit on `main` and a tag on origin.
+Recovery: revert `version.properties` to the previous values and delete the
+dangling tag (`gh release delete <tag> --yes` and `git push origin --delete <tag>`)
+before retrying.
+
+### Versioning
+
+`versionName` is computed at build time as `MAJOR.MINOR.PATCH`:
+
+- `MAJOR` and `MINOR` are read from `version.properties` at the repo root
+- `PATCH` = `git rev-list --count <last v* tag>..HEAD` (resets to 0 on each release)
+- `versionCode` = `git rev-list --count HEAD` (total commit count — monotonic, decoupled
+  from `versionName` so it never regresses on a major bump)
+
+To bump `MAJOR`, edit `version.properties` manually and commit. The next workflow
+dispatch will then produce e.g. `v1.1.0` (the workflow always bumps `MINOR`, so
+hand-editing `MAJOR=1, MINOR=0` then dispatching gives `v1.1.0`, not `v1.0.0`).
+
+### Build Variants
+
+Two installable variants, side-by-side on the same device:
+
+| Variant   | applicationId                       | Label                  | Icon  | Signing                   |
+|-----------|-------------------------------------|------------------------|-------|---------------------------|
+| `debug`   | `com.ossalali.sessionzero.debug`    | "Session Zero (Debug)" | red   | debug keystore (auto)     |
+| `release` | `com.ossalali.sessionzero`          | "Session Zero"         | green | release keystore (CI/local opt-in) |
+
+The debug variant overrides `app_name` and `ic_launcher_background` via
+`app/src/debug/res/`. Release `versionName` gets a `-debug` suffix when built as
+debug.
+
+### Required GitHub Secrets
+
+Set under **Settings → Secrets and variables → Actions**:
+
+- `KEYSTORE_BASE64` — keystore encoded as base64 (use `--body` flag with `gh secret set`,
+  not stdin pipe — PowerShell 5.1 corrupts piped values with UTF-16)
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
+
+### Local Signed Release Builds (Optional)
+
+For `./gradlew assembleRelease` to produce a signed APK on your machine, add to
+`~/.gradle/gradle.properties` (never committed):
+
+```properties
+SESSION_ZERO_KEYSTORE_PATH=C:/path/to/release.jks
+SESSION_ZERO_KEYSTORE_PASSWORD=...
+SESSION_ZERO_KEY_ALIAS=...
+SESSION_ZERO_KEY_PASSWORD=...
+```
+
+Without these, `assembleRelease` still succeeds but produces `app-release-unsigned.apk`
+(installable via `adb install` for personal testing).
+
 ## Architecture
 
 Clean Architecture with three layers:
