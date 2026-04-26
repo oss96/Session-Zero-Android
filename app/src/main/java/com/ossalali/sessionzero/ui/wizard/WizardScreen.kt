@@ -2,25 +2,23 @@ package com.ossalali.sessionzero.ui.wizard
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.ui.common.ConfirmDialog
-import com.ossalali.sessionzero.ui.common.StepIndicator
+import com.ossalali.sessionzero.ui.common.DuskStepper
+import com.ossalali.sessionzero.ui.common.MonoLabel
+import com.ossalali.sessionzero.ui.common.WizardFooter
 import com.ossalali.sessionzero.ui.preview.PreviewData
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 import com.ossalali.sessionzero.ui.wizard.steps.AbilityScoresStep
@@ -70,7 +70,7 @@ fun WizardScreen(
     }
 
     WizardContent(
-        title = if (characterId != null) "Edit Character" else "Create Character",
+        title = if (characterId != null) "Edit Character" else "New Character",
         character = character,
         currentStep = currentStep,
         checkUnsavedChanges = { viewModel.hasUnsavedChanges() },
@@ -137,6 +137,7 @@ fun WizardScreen(
                 8 -> ReviewStep(
                     character = pagerCharacter,
                     derivedStats = derivedStats,
+                    onEditStep = { viewModel.setStep(step = it) },
                 )
             }
         },
@@ -146,7 +147,7 @@ fun WizardScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WizardContent(
-    title: String = "Create Character",
+    title: String = "New Character",
     character: Character = Character.empty(),
     currentStep: Int = 0,
     checkUnsavedChanges: () -> Boolean = { false },
@@ -158,7 +159,7 @@ fun WizardContent(
     onSave: () -> Unit = {},
     stepContent: @Composable (page: Int, character: Character) -> Unit = { _, _ -> },
 ) {
-    var showDiscardDialog by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(value = false) }
 
     val tryNavigateBack: () -> Unit = {
         if (checkUnsavedChanges()) {
@@ -183,14 +184,29 @@ fun WizardContent(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(currentStep) {
-        pagerState.animateScrollToPage(currentStep)
+        pagerState.animateScrollToPage(page = currentStep)
     }
+
+    val isLastStep = currentStep == WizardViewModel.STEP_COUNT - 1
 
     Scaffold(
         topBar = {
             TopAppBar(
                 modifier = Modifier.statusBarsPadding(),
-                title = { Text(text = title) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
+                title = {
+                    Column {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Spacer(modifier = Modifier.height(height = 2.dp))
+                        MonoLabel(text = "Step ${currentStep + 1} of ${WizardViewModel.STEP_COUNT}")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = tryNavigateBack) {
                         Icon(
@@ -202,41 +218,22 @@ fun WizardContent(
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(all = 16.dp),
-            ) {
-                if (currentStep > 0) {
-                    OutlinedButton(
-                        onClick = {
-                            onPrevious()
-                            scope.launch { pagerState.animateScrollToPage(currentStep - 1) }
-                        },
-                    ) {
-                        Text(text = "Previous")
-                    }
-                }
-                Spacer(modifier = Modifier.weight(weight = 1f))
-                if (currentStep < WizardViewModel.STEP_COUNT - 1) {
-                    Button(
-                        onClick = {
-                            onNext()
-                            scope.launch { pagerState.animateScrollToPage(currentStep + 1) }
-                        },
-                    ) {
-                        Text(text = "Next")
-                    }
-                } else {
-                    Button(
-                        onClick = onSave,
-                        enabled = !isSaving && character.name.isNotBlank(),
-                    ) {
-                        Text(text = if (isSaving) "Saving..." else "Save Character")
-                    }
-                }
-            }
+            WizardFooter(
+                showPrevious = currentStep > 0,
+                isLastStep = isLastStep,
+                lastStepLabel = "Begin Adventure",
+                isSaving = isSaving,
+                saveEnabled = character.name.isNotBlank(),
+                onPrevious = {
+                    onPrevious()
+                    scope.launch { pagerState.animateScrollToPage(page = currentStep - 1) }
+                },
+                onNext = {
+                    onNext()
+                    scope.launch { pagerState.animateScrollToPage(page = currentStep + 1) }
+                },
+                onSave = onSave,
+            )
         },
     ) { padding ->
         Column(
@@ -244,14 +241,15 @@ fun WizardContent(
                 .fillMaxSize()
                 .padding(paddingValues = padding),
         ) {
-            StepIndicator(
+            DuskStepper(
                 steps = WizardViewModel.STEP_LABELS,
                 currentStep = currentStep,
                 onStepClick = { step ->
                     onStepClick(step)
-                    scope.launch { pagerState.animateScrollToPage(step) }
+                    scope.launch { pagerState.animateScrollToPage(page = step) }
                 },
             )
+            Spacer(modifier = Modifier.height(height = 8.dp))
 
             HorizontalPager(
                 state = pagerState,
@@ -281,9 +279,9 @@ fun WizardContent(
 @PreviewLightDark
 @Composable
 private fun WizardScreenNewPreview() {
-    SessionZeroTheme {
+    SessionZeroTheme(dynamicColor = false) {
         WizardContent(
-            title = "Create Character",
+            title = "New Character",
             currentStep = 0,
         )
     }
@@ -292,7 +290,7 @@ private fun WizardScreenNewPreview() {
 @PreviewLightDark
 @Composable
 private fun WizardScreenMidStepPreview() {
-    SessionZeroTheme {
+    SessionZeroTheme(dynamicColor = false) {
         WizardContent(
             title = "Edit Character",
             character = PreviewData.sampleCharacter,
@@ -304,9 +302,9 @@ private fun WizardScreenMidStepPreview() {
 @PreviewLightDark
 @Composable
 private fun WizardScreenLastStepPreview() {
-    SessionZeroTheme {
+    SessionZeroTheme(dynamicColor = false) {
         WizardContent(
-            title = "Create Character",
+            title = "New Character",
             character = PreviewData.sampleCharacter,
             currentStep = 8,
         )

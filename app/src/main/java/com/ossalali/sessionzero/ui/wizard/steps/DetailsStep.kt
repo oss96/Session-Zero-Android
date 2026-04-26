@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -18,15 +21,13 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -35,10 +36,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.ossalali.sessionzero.domain.model.Alignment
+import com.ossalali.sessionzero.domain.model.Alignment as DndAlignment
 import com.ossalali.sessionzero.domain.model.Appearance
 import com.ossalali.sessionzero.domain.model.Character
-import com.ossalali.sessionzero.ui.common.SectionHeader
+import com.ossalali.sessionzero.ui.common.DuskSectionHeader
+import com.ossalali.sessionzero.ui.common.DuskSegmentedControl
+import com.ossalali.sessionzero.ui.common.DuskTextField
+import com.ossalali.sessionzero.ui.common.MonoLabel
 import com.ossalali.sessionzero.ui.preview.PreviewData
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
@@ -48,7 +52,7 @@ fun DetailsStep(
     character: Character,
     onNameChanged: (String) -> Unit = {},
     onPronounsChanged: (String) -> Unit = {},
-    onAlignmentChanged: (Alignment?) -> Unit = {},
+    onAlignmentChanged: (DndAlignment?) -> Unit = {},
     onAppearanceChanged: (Appearance) -> Unit = {},
     onPersonalityTraitsChanged: (String) -> Unit = {},
     onIdealsChanged: (String) -> Unit = {},
@@ -65,275 +69,236 @@ fun DetailsStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(all = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .verticalScroll(state = rememberScrollState()),
     ) {
-        SectionHeader(text = "Character Details")
+        DuskSectionHeader(title = "Details", kicker = "Identity")
 
-        // Index 0: Character Name
-        OutlinedTextField(
+        DuskTextField(
+            label = "Character name",
             value = character.name,
             onValueChange = onNameChanged,
-            label = { Text(text = "Character Name") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester = focusRequesters[0]),
-            singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(
                 onNext = { focusRequesters[1].requestFocus() },
             ),
         )
-        Spacer(modifier = Modifier.height(height = 8.dp))
+        Spacer(modifier = Modifier.height(height = 10.dp))
 
-        // Index 1: Pronouns
-        OutlinedTextField(
-            value = character.pronouns,
-            onValueChange = onPronounsChanged,
-            label = { Text(text = "Pronouns") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester = focusRequesters[1]),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            keyboardActions = KeyboardActions(
-                onNext = { focusRequesters[2].requestFocus() },
-            ),
-        )
-        Spacer(modifier = Modifier.height(height = 8.dp))
-
-        // Alignment dropdown (readOnly, no focus chaining)
-        var alignmentExpanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = alignmentExpanded,
-            onExpandedChange = { alignmentExpanded = it },
-        ) {
-            OutlinedTextField(
-                value = character.alignment?.displayName ?: "Select alignment...",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(text = "Alignment") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = alignmentExpanded) },
-                modifier = Modifier
-                    .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth(),
+        Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
+            DuskTextField(
+                modifier = Modifier.weight(weight = 1f),
+                label = "Pronouns",
+                value = character.pronouns,
+                onValueChange = onPronounsChanged,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             )
-            ExposedDropdownMenu(
-                expanded = alignmentExpanded,
-                onDismissRequest = { alignmentExpanded = false },
-            ) {
-                Alignment.entries.forEach { alignment ->
-                    DropdownMenuItem(
-                        text = { Text(text = alignment.displayName) },
-                        onClick = {
-                            onAlignmentChanged(alignment)
-                            alignmentExpanded = false
+            // Alignment dropdown
+            Column(modifier = Modifier.weight(weight = 1f)) {
+                MonoLabel(text = "Alignment")
+                Spacer(modifier = Modifier.height(height = 4.dp))
+                var alignmentExpanded by remember { mutableStateOf(value = false) }
+                ExposedDropdownMenuBox(
+                    expanded = alignmentExpanded,
+                    onExpandedChange = { alignmentExpanded = it },
+                ) {
+                    OutlinedTextField(
+                        value = character.alignment?.displayName ?: "Select…",
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        shape = RoundedCornerShape(size = 10.dp),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = alignmentExpanded)
                         },
+                        modifier = Modifier
+                            .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
                     )
+                    ExposedDropdownMenu(
+                        expanded = alignmentExpanded,
+                        onDismissRequest = { alignmentExpanded = false },
+                    ) {
+                        DndAlignment.entries.forEach { alignment ->
+                            DropdownMenuItem(
+                                text = { Text(text = alignment.displayName) },
+                                onClick = {
+                                    onAlignmentChanged(alignment)
+                                    alignmentExpanded = false
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(height = 16.dp))
-        SectionHeader(text = "Appearance")
+        DuskSectionHeader(title = "Appearance", kicker = "What they look like")
 
-        // Index 2: Age (numeric)
-        OutlinedTextField(
+        DuskTextField(
+            label = "Age",
             value = appearance.age,
             onValueChange = { onAppearanceChanged(appearance.copy(age = it)) },
-            label = { Text(text = "Age") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester = focusRequesters[2]),
-            singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,
             ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusRequesters[3].requestFocus() },
-            ),
         )
-        Spacer(modifier = Modifier.height(height = 4.dp))
+        Spacer(modifier = Modifier.height(height = 8.dp))
 
-        // Index 3: Height (numeric + unit toggle)
+        // Height
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
+            DuskTextField(
+                modifier = Modifier.weight(weight = 1f),
+                label = "Height",
                 value = appearance.height,
                 onValueChange = { onAppearanceChanged(appearance.copy(height = it)) },
-                label = { Text(text = "Height") },
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .focusRequester(focusRequester = focusRequesters[3]),
-                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next,
                 ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusRequesters[4].requestFocus() },
-                ),
             )
-            SingleChoiceSegmentedButtonRow {
-                SegmentedButton(
-                    selected = appearance.heightUnit == "m",
-                    onClick = { onAppearanceChanged(appearance.copy(heightUnit = "m")) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                ) { Text(text = "m") }
-                SegmentedButton(
-                    selected = appearance.heightUnit == "ft",
-                    onClick = { onAppearanceChanged(appearance.copy(heightUnit = "ft")) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                ) { Text(text = "ft") }
+            Column(modifier = Modifier.width(width = 140.dp)) {
+                MonoLabel(text = "Unit")
+                Spacer(modifier = Modifier.height(height = 4.dp))
+                DuskSegmentedControl(
+                    options = listOf("m", "ft"),
+                    selectedIndex = if (appearance.heightUnit == "ft") 1 else 0,
+                    onSelect = {
+                        onAppearanceChanged(
+                            appearance.copy(heightUnit = if (it == 0) "m" else "ft"),
+                        )
+                    },
+                )
             }
         }
-        Spacer(modifier = Modifier.height(height = 4.dp))
+        Spacer(modifier = Modifier.height(height = 8.dp))
 
-        // Index 4: Weight (numeric + unit toggle)
+        // Weight
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
+            DuskTextField(
+                modifier = Modifier.weight(weight = 1f),
+                label = "Weight",
                 value = appearance.weight,
                 onValueChange = { onAppearanceChanged(appearance.copy(weight = it)) },
-                label = { Text(text = "Weight") },
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .focusRequester(focusRequester = focusRequesters[4]),
-                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next,
                 ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusRequesters[5].requestFocus() },
-                ),
             )
-            SingleChoiceSegmentedButtonRow {
-                SegmentedButton(
-                    selected = appearance.weightUnit == "kg",
-                    onClick = { onAppearanceChanged(appearance.copy(weightUnit = "kg")) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                ) { Text(text = "kg") }
-                SegmentedButton(
-                    selected = appearance.weightUnit == "lbs",
-                    onClick = { onAppearanceChanged(appearance.copy(weightUnit = "lbs")) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                ) { Text(text = "lbs") }
+            Column(modifier = Modifier.width(width = 140.dp)) {
+                MonoLabel(text = "Unit")
+                Spacer(modifier = Modifier.height(height = 4.dp))
+                DuskSegmentedControl(
+                    options = listOf("kg", "lbs"),
+                    selectedIndex = if (appearance.weightUnit == "lbs") 1 else 0,
+                    onSelect = {
+                        onAppearanceChanged(
+                            appearance.copy(weightUnit = if (it == 0) "kg" else "lbs"),
+                        )
+                    },
+                )
             }
         }
-        Spacer(modifier = Modifier.height(height = 4.dp))
+        Spacer(modifier = Modifier.height(height = 8.dp))
 
-        // Indices 5-7: Eyes, Skin, Hair (text fields with IME navigation)
-        listOf(
-            Triple(first = "Eyes", second = appearance.eyes, third = 5),
-            Triple(first = "Skin", second = appearance.skin, third = 6),
-            Triple(first = "Hair", second = appearance.hair, third = 7),
-        ).forEach { (label, value, focusIndex) ->
-            val isLast = focusIndex == 7
-            OutlinedTextField(
-                value = value,
-                onValueChange = { newVal ->
-                    val newAppearance = when (label) {
-                        "Eyes" -> appearance.copy(eyes = newVal)
-                        "Skin" -> appearance.copy(skin = newVal)
-                        "Hair" -> appearance.copy(hair = newVal)
-                        else -> appearance
-                    }
-                    onAppearanceChanged(newAppearance)
-                },
-                label = { Text(text = label) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester = focusRequesters[focusIndex]),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = if (isLast) ImeAction.Done else ImeAction.Next,
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = {
-                        if (!isLast) focusRequesters[focusIndex + 1].requestFocus()
-                    },
-                    onDone = { focusManager.clearFocus() },
-                ),
-            )
-            Spacer(modifier = Modifier.height(height = 4.dp))
-        }
+        DuskTextField(
+            label = "Eyes",
+            value = appearance.eyes,
+            onValueChange = { onAppearanceChanged(appearance.copy(eyes = it)) },
+        )
+        Spacer(modifier = Modifier.height(height = 8.dp))
+
+        DuskTextField(
+            label = "Skin",
+            value = appearance.skin,
+            onValueChange = { onAppearanceChanged(appearance.copy(skin = it)) },
+        )
+        Spacer(modifier = Modifier.height(height = 8.dp))
+
+        DuskTextField(
+            label = "Hair",
+            value = appearance.hair,
+            onValueChange = { onAppearanceChanged(appearance.copy(hair = it)) },
+        )
 
         Spacer(modifier = Modifier.height(height = 16.dp))
-        SectionHeader(text = "Personality")
+        DuskSectionHeader(title = "Personality", kicker = "Who you are")
 
-        OutlinedTextField(
+        DuskTextField(
+            label = "Traits",
             value = character.personalityTraits,
             onValueChange = onPersonalityTraitsChanged,
-            label = { Text(text = "Personality Traits") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
         Spacer(modifier = Modifier.height(height = 8.dp))
-        OutlinedTextField(
+        DuskTextField(
+            label = "Ideals",
             value = character.ideals,
             onValueChange = onIdealsChanged,
-            label = { Text(text = "Ideals") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
         Spacer(modifier = Modifier.height(height = 8.dp))
-        OutlinedTextField(
+        DuskTextField(
+            label = "Bonds",
             value = character.bonds,
             onValueChange = onBondsChanged,
-            label = { Text(text = "Bonds") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
         Spacer(modifier = Modifier.height(height = 8.dp))
-        OutlinedTextField(
+        DuskTextField(
+            label = "Flaws",
             value = character.flaws,
             onValueChange = onFlawsChanged,
-            label = { Text(text = "Flaws") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
 
         Spacer(modifier = Modifier.height(height = 16.dp))
-        SectionHeader(text = "Backstory")
+        DuskSectionHeader(title = "Backstory", kicker = "Tell their story")
 
-        OutlinedTextField(
+        DuskTextField(
+            label = "Backstory",
             value = character.backstory,
             onValueChange = onBackstoryChanged,
-            label = { Text(text = "Backstory") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 4,
         )
         Spacer(modifier = Modifier.height(height = 8.dp))
-        OutlinedTextField(
+        DuskTextField(
+            label = "Allies & Organizations",
             value = character.alliesAndOrganizations,
             onValueChange = onAlliesChanged,
-            label = { Text(text = "Allies & Organizations") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
         Spacer(modifier = Modifier.height(height = 8.dp))
-        OutlinedTextField(
+        DuskTextField(
+            label = "Additional notes",
             value = character.additionalNotes,
             onValueChange = onNotesChanged,
-            label = { Text(text = "Additional Notes") },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
             minLines = 2,
         )
+
+        Spacer(modifier = Modifier.height(height = 24.dp))
     }
 }
 
 @PreviewLightDark
 @Composable
 private fun DetailsStepPreview() {
-    SessionZeroTheme {
+    SessionZeroTheme(dynamicColor = false) {
         DetailsStep(character = PreviewData.sampleCharacter)
     }
 }
