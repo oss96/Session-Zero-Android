@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +7,39 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+fun runGit(vararg args: String): String? = try {
+    val proc = ProcessBuilder("git", *args)
+        .directory(rootProject.projectDir)
+        .redirectErrorStream(false)
+        .start()
+    proc.waitFor()
+    if (proc.exitValue() == 0) proc.inputStream.bufferedReader().readText().trim() else null
+} catch (_: Exception) {
+    null
+}
+
+fun computeVersion(): Pair<String, Int> {
+    val props = Properties().apply {
+        rootProject.file("version.properties").takeIf { it.exists() }
+            ?.inputStream()?.use { load(it) }
+    }
+    val major = (props.getProperty("MAJOR") ?: "0").toInt()
+    val minor = (props.getProperty("MINOR") ?: "0").toInt()
+
+    val lastTag = runGit("describe", "--tags", "--abbrev=0", "--match", "v*")
+    val patch = if (lastTag != null) {
+        runGit("rev-list", "--count", "$lastTag..HEAD")?.toIntOrNull() ?: 0
+    } else {
+        runGit("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
+    }
+
+    val versionName = "$major.$minor.$patch"
+    val versionCode = runGit("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+    return versionName to versionCode
+}
+
+val (computedVersionName, computedVersionCode) = computeVersion()
 
 android {
     namespace = "com.ossalali.sessionzero"
@@ -18,19 +53,40 @@ android {
         applicationId = "com.ossalali.sessionzero"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = computedVersionCode
+        versionName = computedVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        val keystorePath = (findProperty("SESSION_ZERO_KEYSTORE_PATH") as String?)
+            ?: System.getenv("SESSION_ZERO_KEYSTORE_PATH")
+        if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = (findProperty("SESSION_ZERO_KEYSTORE_PASSWORD") as String?)
+                    ?: System.getenv("SESSION_ZERO_KEYSTORE_PASSWORD")
+                keyAlias = (findProperty("SESSION_ZERO_KEY_ALIAS") as String?)
+                    ?: System.getenv("SESSION_ZERO_KEY_ALIAS")
+                keyPassword = (findProperty("SESSION_ZERO_KEY_PASSWORD") as String?)
+                    ?: System.getenv("SESSION_ZERO_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
     compileOptions {

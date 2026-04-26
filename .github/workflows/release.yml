@@ -1,32 +1,67 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout (full history + tags)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump MINOR in version.properties
+        id: bump
+        run: |
+          MAJOR=$(grep -E '^MAJOR=' version.properties | cut -d= -f2)
+          OLD_MINOR=$(grep -E '^MINOR=' version.properties | cut -d= -f2)
+          NEW_MINOR=$((OLD_MINOR + 1))
+          sed -i "s/^MINOR=.*/MINOR=${NEW_MINOR}/" version.properties
+          NEW_VERSION="${MAJOR}.${NEW_MINOR}.0"
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Bumped to ${NEW_VERSION}"
+
+      - name: Commit and tag
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.properties
+          git commit -m "chore(Release): bump version to v${{ steps.bump.outputs.new_version }}"
+          git tag "v${{ steps.bump.outputs.new_version }}"
+          git push origin HEAD --follow-tags
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: 17
 
-      - name: Setup Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Release APK
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+          echo "SESSION_ZERO_KEYSTORE_PATH=$GITHUB_WORKSPACE/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build release APK
+        env:
+          SESSION_ZERO_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SESSION_ZERO_KEY_ALIAS:         ${{ secrets.KEY_ALIAS }}
+          SESSION_ZERO_KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
-      - name: Create GitHub Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/*.apk
+          tag_name: v${{ steps.bump.outputs.new_version }}
           generate_release_notes: true
+          files: app/build/outputs/apk/release/*.apk
