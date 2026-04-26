@@ -27,11 +27,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,7 +62,6 @@ import com.ossalali.sessionzero.ui.common.MonoLabel
 import com.ossalali.sessionzero.ui.common.SelectableCard
 import com.ossalali.sessionzero.ui.preview.PreviewData
 import com.ossalali.sessionzero.ui.theme.LocalDuskTokens
-import com.ossalali.sessionzero.ui.theme.LocalDuskTypography
 import com.ossalali.sessionzero.ui.theme.SessionZeroTheme
 
 private val METHODS = listOf("pointBuy", "standardArray", "rolled", "manual")
@@ -75,8 +74,6 @@ fun AbilityScoresStep(
     onBaseScoreChanged: (AbilityName, Int) -> Unit = { _, _ -> },
     onAllScoresChanged: (Int, Int, Int, Int, Int, Int) -> Unit = { _, _, _, _, _, _ -> },
 ) {
-    val tokens = LocalDuskTokens.current
-    val scheme = MaterialTheme.colorScheme
     val selectedMethod = character.abilityScoreMethod ?: "pointBuy"
     val selectedIndex = METHODS.indexOf(element = selectedMethod).coerceAtLeast(minimumValue = 0)
 
@@ -174,7 +171,6 @@ private fun PointBuyHeaderCard(character: Character) {
 
 @Composable
 private fun RollHeaderCard(onRoll: () -> Unit) {
-    val tokens = LocalDuskTokens.current
     val scheme = MaterialTheme.colorScheme
 
     SelectableCard(contentPadding = 12) {
@@ -229,7 +225,6 @@ private fun PointBuyRows(
     character: Character,
     onBaseScoreChanged: (AbilityName, Int) -> Unit,
 ) {
-    val tokens = LocalDuskTokens.current
     val scheme = MaterialTheme.colorScheme
     val scoreList = AbilityName.entries.map { character.baseAbilityScores[it] }
     val remaining = AbilityRules.remainingPoints(scores = scoreList)
@@ -316,7 +311,7 @@ private fun StandardArrayRows(
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                             },
                             modifier = Modifier
-                                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                                 .width(width = 96.dp),
                         )
                         ExposedDropdownMenu(

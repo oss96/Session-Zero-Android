@@ -46,7 +46,6 @@ fun SkillsStep(
     onToggleSkill: (SkillName) -> Unit = {},
 ) {
     val tokens = LocalDuskTokens.current
-    val scheme = MaterialTheme.colorScheme
     val classDef = character.className?.let { ClassData.ALL_CLASSES.find { c -> c.name == it } }
     val bgDef = character.background?.let { BackgroundData.ALL_BACKGROUNDS.find { b -> b.name == it } }
     val backgroundSkills = bgDef?.skillProficiencies ?: emptyList()

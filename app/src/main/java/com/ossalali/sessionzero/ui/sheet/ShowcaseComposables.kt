@@ -34,14 +34,12 @@ import com.ossalali.sessionzero.domain.model.Character
 import com.ossalali.sessionzero.ui.common.DuskTag
 import com.ossalali.sessionzero.ui.common.DuskTagVariant
 import com.ossalali.sessionzero.ui.common.MonoLabel
-import com.ossalali.sessionzero.ui.theme.LocalDuskTokens
 
 /**
  * Italic "tale so far" card shown at the top of showcase mode.
  */
 @Composable
 fun ShowcaseTaleCard(text: String) {
-    val tokens = LocalDuskTokens.current
     val scheme = MaterialTheme.colorScheme
 
     Column(
@@ -133,7 +131,6 @@ private fun ShowcasePersonalityRow(item: ShowcasePersonalityItem) {
 @Composable
 fun ShowcaseEquipment(character: Character) {
     val scheme = MaterialTheme.colorScheme
-    val tokens = LocalDuskTokens.current
 
     Column(
         modifier = Modifier
