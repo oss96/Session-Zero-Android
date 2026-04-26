@@ -61,7 +61,7 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Rename APK
-        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/SessionZero.apk
+        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/Session-Zero.apk
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -69,4 +69,4 @@ jobs:
           tag_name: v${{ steps.bump.outputs.new_version }}
           name: Session Zero v${{ steps.bump.outputs.new_version }}
           generate_release_notes: true
-          files: app/build/outputs/apk/release/SessionZero.apk
+          files: app/build/outputs/apk/release/Session-Zero.apk

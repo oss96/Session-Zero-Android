@@ -68,10 +68,10 @@ The workflow runs end-to-end on GitHub's runners and:
 2. Creates an annotated tag `vMAJOR.MINOR.0` and pushes both the commit and tag
 3. Decodes the keystore from the `KEYSTORE_BASE64` secret onto the runner
 4. Builds the signed APK via `./gradlew assembleRelease` and renames it
-   `SessionZero.apk` (GitHub Releases replaces spaces in asset names with
+   `Session-Zero.apk` (GitHub Releases replaces spaces in asset names with
    periods, so the filename stays space-free)
 5. Publishes a GitHub Release titled **Session Zero vMAJOR.MINOR.PATCH** with
-   `SessionZero.apk` attached and auto-generated release notes (commits since
+   `Session-Zero.apk` attached and auto-generated release notes (commits since
    the previous tag)
 
 A failed run after step 2 will leave a bump commit on `main` and a tag on origin.
