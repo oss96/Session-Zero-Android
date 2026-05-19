@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
@@ -10,32 +12,26 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (full history + tags)
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v6
 
-      - name: Bump MINOR in version.properties
-        id: bump
+      - name: Get version from tag
+        id: version
+        shell: bash
         run: |
-          MAJOR=$(grep -E '^MAJOR=' version.properties | cut -d= -f2)
-          OLD_MINOR=$(grep -E '^MINOR=' version.properties | cut -d= -f2)
-          NEW_MINOR=$((OLD_MINOR + 1))
-          sed -i "s/^MINOR=.*/MINOR=${NEW_MINOR}/" version.properties
-          NEW_VERSION="${MAJOR}.${NEW_MINOR}.0"
-          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Bumped to ${NEW_VERSION}"
+          VERSION="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$VERSION' is not valid semver (expected X.Y.Z)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and tag
+      - name: Set version in version.properties
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.properties
-          git commit -m "chore(Release): bump version to v${{ steps.bump.outputs.new_version }}"
-          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Release v${{ steps.bump.outputs.new_version }}"
-          git push origin HEAD
-          git push origin "v${{ steps.bump.outputs.new_version }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.version.outputs.version }}"
+          sed -i "s/^MAJOR=.*/MAJOR=${MAJOR}/" version.properties
+          sed -i "s/^MINOR=.*/MINOR=${MINOR}/" version.properties
+          sed -i "s/^PATCH=.*/PATCH=${PATCH}/" version.properties
+          cat version.properties
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -63,10 +59,19 @@ jobs:
       - name: Rename APK
         run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/Session-Zero.apk
 
+      - name: Delete previous release entry (keep tag)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREV_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || true)
+          if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "${{ steps.version.outputs.version }}" ]; then
+            gh release delete "$PREV_TAG" --yes
+          fi
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: v${{ steps.bump.outputs.new_version }}
-          name: Session Zero v${{ steps.bump.outputs.new_version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Session Zero ${{ steps.version.outputs.version }}
           generate_release_notes: true
           files: app/build/outputs/apk/release/Session-Zero.apk
